@@ -16,7 +16,7 @@ const ActiveProfileContext = createContext<
   ActiveProfileContextType | undefined
 >(undefined);
 
-const BASE_URL = 'http://192.168.0.104:5000/api/users'; // Your backend URL
+const BASE_URL = 'https://ai-nutritionist-5jyf.onrender.com/api/users'; // Your backend URL
 
 export const ActiveProfileProvider: React.FC<{ children: ReactNode }> = ({
   children,

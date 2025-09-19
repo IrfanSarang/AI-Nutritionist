@@ -14,7 +14,7 @@ import { useActiveProfile } from '../../backend/context/ActiveProfileContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const BASE_URL = 'http://192.168.0.104:5000/api/users';
+const BASE_URL = 'https://ai-nutritionist-5jyf.onrender.com/api/users';
 
 // Profile type matches backend fields
 type Profile = {

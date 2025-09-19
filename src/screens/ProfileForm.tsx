@@ -69,7 +69,7 @@ const ProfileForm = () => {
         return;
       }
 
-      const BASE_URL = 'http://192.168.0.104:5000';
+      const BASE_URL = 'https://ai-nutritionist-5jyf.onrender.com';
 
       // Check existing profiles safely
       let existingProfiles: any[] = [];
