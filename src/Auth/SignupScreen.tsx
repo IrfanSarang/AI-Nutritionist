@@ -35,7 +35,7 @@ export default function SignupScreen() {
 
     try {
       const response = await fetch(
-        'http://192.168.0.104:5000/api/users/register',
+        'https://ai-nutritionist-5jyf.onrender.com/api/users/register',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

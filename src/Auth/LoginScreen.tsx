@@ -43,7 +43,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       const response = await fetch(
-        'http://192.168.0.104:5000/api/users/login',
+        'https://ai-nutritionist-5jyf.onrender.com/api/users/login',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
