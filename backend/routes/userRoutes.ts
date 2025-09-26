@@ -21,6 +21,11 @@ import {
 } from '../controllers/planController';
 
 import { fetchProfileName } from '../controllers/nameController';
+import {
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
+} from '../controllers/forgetPassController';
 
 const router = express.Router();
 
@@ -52,4 +57,10 @@ router.get('/:userId/firstProfile', fetchProfile);
 
 //fetching profileName
 router.get('/:profileId/fetchName', fetchProfileName);
+
+//forget password
+router.post('/forgot-password', forgotPassword);
+router.post('/verify-otp', verifyOtp);
+router.post('/reset-password', resetPassword);
+
 export default router;

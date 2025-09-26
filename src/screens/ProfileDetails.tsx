@@ -13,8 +13,8 @@ import {
 import { useActiveProfile } from '../../backend/context/ActiveProfileContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
-const BASE_URL = 'https://ai-nutritionist-5jyf.onrender.com/api/users';
+import { GOOGLE_API_KEY_2 } from '@env';
+import { BASE_URL } from '../../config';
 
 // Profile type matches backend fields
 type Profile = {
@@ -57,10 +57,17 @@ const ProfileDetails: React.FC = () => {
   // Fetch profile data
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!activeProfileId) {
+        setLoading(false);
+        setProfile(null);
+        return; // 👈 Skip fetch if no profile
+      }
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`${BASE_URL}/profile/${activeProfileId}`);
+        const res = await fetch(
+          `${BASE_URL}/api/users/profile/${activeProfileId}`,
+        );
         if (!res.ok) throw new Error('Failed to fetch profile');
         const data = (await res.json()) as Profile;
         setProfile(data);
@@ -80,11 +87,14 @@ const ProfileDetails: React.FC = () => {
       if (!formData) return;
       setLoading(true);
       setError(null);
-      const res = await fetch(`${BASE_URL}/profile/${activeProfileId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `${BASE_URL}/api/users/profile/${activeProfileId}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        },
+      );
       const data = (await res.json()) as Profile;
       if (res.ok) {
         setProfile(data);
@@ -144,24 +154,6 @@ const ProfileDetails: React.FC = () => {
     </View>
   );
 
-  const handleLogout = () => {
-    // Example: clear activeProfileId (if your context supports it)
-    // You can add a logout API call if needed
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        onPress: () => {
-          // TODO: Clear user state or token here
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'GetStarted' }], // Make sure 'Login' exists in your navigator
-          });
-        },
-      },
-    ]);
-  };
-
   const fetchDiagnosis = async () => {
     if (!profile) return;
 
@@ -205,7 +197,7 @@ suggest foods that can help.
 `;
 
       const response = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyA-NqbjEH_cCC0-jVYcQJ5PVTXTf4VPyVo',
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY_2}`,
         {
           method: 'POST',
           headers: {
@@ -247,9 +239,6 @@ suggest foods that can help.
             source={require('../assets/icons/editIcon.png')}
             style={styles.editButton}
           />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.logoutIcon} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
       </View>
 

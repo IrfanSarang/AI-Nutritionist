@@ -1,14 +1,13 @@
-import moongoose from 'mongoose';
-
-const MONGO_URI =
-  'mongodb+srv://irfan:irfan@cluster0.k4jbyjv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    await moongoose.connect(MONGO_URI);
+    if (!process.env.MONGO_URL) throw new Error('MONGO_URL not defined');
+
+    await mongoose.connect(process.env.MONGO_URL);
     console.log('MongoDB connected');
   } catch (err) {
-    console.error('MongoDb connection failed: ', err);
+    console.error('MongoDB connection failed: ', err);
     process.exit(1);
   }
 };

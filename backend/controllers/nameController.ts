@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import User from '../models/user';
-import mongoose from 'mongoose';
 
 // Fetch profile name by profileId
 export const fetchProfileName = async (req: Request, res: Response) => {

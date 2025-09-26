@@ -29,19 +29,28 @@ export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email, password });
+    const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid username or password' });
+      // ❌ Email not found
+      return res.status(401).json({ errors: { email: 'Email not found' } });
     }
 
-    // ✅ Send only ONE response
+    if (user.password !== password) {
+      // ❌ Password incorrect
+      return res
+        .status(401)
+        .json({ errors: { password: 'Incorrect password' } });
+    }
+
+    // ✅ Successful login
     return res.json({
       message: 'Login successful',
       user: user,
     });
   } catch (err) {
-    return res.status(500).json({ message: 'Error logging in', error: err });
+    console.error('Login error:', err);
+    return res.status(500).json({ errors: { general: 'Error logging in' } });
   }
 };
 

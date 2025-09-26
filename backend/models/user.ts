@@ -48,6 +48,8 @@ export interface IUser extends Document {
   email: string;
   password: string;
   profile: IProfile[];
+  resetToken?: string | null;
+  resetTokenExpiry?: Date | null;
 }
 
 const userSchema: Schema = new Schema({
@@ -55,6 +57,8 @@ const userSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   profile: { type: [profileSchema], default: [] },
+  resetToken: { type: String, default: '' },
+  resetTokenExpiry: { type: Date, default: null },
 });
 
 const User = mongoose.model<IUser>('User', userSchema);

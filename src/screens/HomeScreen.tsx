@@ -42,7 +42,9 @@ const HomeScreen = () => {
       {/* Header Row */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Hello, {activeProfileName}</Text>
+          <Text style={styles.greeting}>
+            Hello, {activeProfileName ? activeProfileName : 'Guest'}
+          </Text>
           <Text style={styles.date}>{formattedDate}</Text>
         </View>
 

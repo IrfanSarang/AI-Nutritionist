@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { GOOGLE_API_KEY_2 } from '@env';
 
 type RootStackParamList = {
   ProductDetails: { code: string };
@@ -98,7 +99,7 @@ ${ingredients}
 `;
 
       const response = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyA-NqbjEH_cCC0-jVYcQJ5PVTXTf4VPyVo',
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY_2}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

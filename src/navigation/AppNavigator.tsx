@@ -13,6 +13,8 @@ import AIScreen from '../screens/AIScreen';
 import ProfileForm from '../screens/ProfileForm';
 import ProfileScreen from '../screens/ProfileDetails';
 import Scanner from '../screens/Scanner';
+import ForgotPasswordScreen from '../Auth/ForgetPasswordScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 
 export type RootStackParamList = {
   GetStarted: undefined;
@@ -28,6 +30,8 @@ export type RootStackParamList = {
   ProfileForm: undefined;
   ProfileScreen: undefined;
   Scanner: undefined;
+  ForgotPassword: undefined;
+  ChangePasswordScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -48,6 +52,11 @@ export default function AppNavigator() {
       <Stack.Screen name="ProfileForm" component={ProfileForm} />
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="Scanner" component={Scanner} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen
+        name="ChangePasswordScreen"
+        component={ChangePasswordScreen}
+      />
     </Stack.Navigator>
   );
 }

@@ -15,20 +15,20 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useActiveProfile } from '../../backend/context/ActiveProfileContext';
 import { useUser } from '../../backend/context/UserIdContext';
+import { BASE_URL } from '../../config';
 
 type RootStackParamList = {
   Profiles: undefined;
   ProfileDetails: { id: string };
   ProfileForm: undefined;
+  Login: undefined;
+  ChangePasswordScreen: undefined;
 };
 
 type Profile = {
-  id: string; // normalized id used throughout the app
+  id: string;
   name: string;
 };
-
-// 👇 move this into .env later with react-native-config
-const BASE_URL = 'https://ai-nutritionist-5jyf.onrender.com/api/users';
 
 export default function ProfilesScreen() {
   const navigation =
@@ -40,9 +40,10 @@ export default function ProfilesScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const { activeProfileId, setActiveProfileId } = useActiveProfile();
-  const { userId } = useUser(); // <-- Use the new context hook
+  const { userId } = useUser();
 
-  // 🔧 Safe normalization
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+
   const normalize = (raw: any[]): Profile[] =>
     (raw ?? []).flatMap(user =>
       (user.profile ?? [])
@@ -56,10 +57,8 @@ export default function ProfilesScreen() {
   const fetchProfiles = useCallback(async () => {
     try {
       setError(null);
-      const res = await fetch(`${BASE_URL}/fetchData`);
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
+      const res = await fetch(`${BASE_URL}/api/users/fetchData`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = (await res.json()) as unknown;
       const data = Array.isArray(json) ? normalize(json) : [];
       setProfiles(data);
@@ -76,23 +75,22 @@ export default function ProfilesScreen() {
     }
   }, [activeProfileId, setActiveProfileId]);
 
-  // NEW: Delete profile handler
   const handleDeleteProfile = async (profileId: string) => {
     try {
       setLoading(true);
       setError(null);
-      // const userId = await AsyncStorage.getItem('userId'); <-- REMOVE THIS LINE
       if (!userId) {
         setError('User ID not found');
         setLoading(false);
         return;
       }
-      const res = await fetch(`${BASE_URL}/${userId}/profiles/${profileId}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) {
-        throw new Error('Failed to delete profile');
-      }
+      const res = await fetch(
+        `${BASE_URL}/api/users/${userId}/profiles/${profileId}`,
+        {
+          method: 'DELETE',
+        },
+      );
+      if (!res.ok) throw new Error('Failed to delete profile');
       await fetchProfiles();
     } catch (e: any) {
       setError(e?.message ?? 'Failed to delete profile');
@@ -115,137 +113,166 @@ export default function ProfilesScreen() {
     fetchProfiles();
   }, [fetchProfiles]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#4287f5" />
-      </View>
-    );
-  }
+  const handleLogout = () => {
+    setActiveProfileId(null); // Clear active profile
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }], // Replace with your login screen
+    });
+  };
 
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Error: {error}</Text>
+  const renderProfileItem = ({ item }: { item: Profile }) => (
+    <View style={styles.profileCard}>
+      <View style={styles.profileInfo}>
+        <Image
+          source={require('../assets/icons/profileIcon.png')}
+          style={styles.profileImage}
+        />
+        <View style={{ marginLeft: 10 }}>
+          <Text style={styles.name}>{item.name}</Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor:
+                item.id === activeProfileId ? '#007bff' : '#5aa9f9',
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 20,
+              right: 8,
+            }}
+            onPress={() => setActiveProfileId(item.id)}
+            disabled={item.id === activeProfileId}
+          >
+            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 13 }}>
+              {item.id === activeProfileId ? 'Active' : 'Switch Profile'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity
-          style={styles.retryButton}
-          onPress={fetchProfiles}
-          accessibilityRole="button"
-          accessibilityLabel="Retry loading profiles"
+          style={styles.editButton}
+          onPress={() => navigation.navigate('ProfileDetails', { id: item.id })}
         >
-          <Text style={styles.retryText}>Try Again</Text>
+          <Text style={styles.editText}>Show</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.editButton,
+            { backgroundColor: 'crimson', marginLeft: 8 },
+          ]}
+          onPress={() =>
+            Alert.alert(
+              'Delete Profile',
+              'Are you sure you want to delete this profile?',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete',
+                  style: 'destructive',
+                  onPress: () => handleDeleteProfile(item.id),
+                },
+              ],
+            )
+          }
+        >
+          <Text style={styles.editText}>Delete</Text>
         </TouchableOpacity>
       </View>
-    );
-  }
-
-  if (profiles.length === 0) {
-    return (
-      <View style={styles.center}>
-        <Text>No profiles found</Text>
-        <TouchableOpacity
-          style={[styles.retryButton, { marginTop: 12 }]}
-          onPress={() => navigation.navigate('ProfileForm')}
-          accessibilityRole="button"
-          accessibilityLabel="Add a new user"
-        >
-          <Text style={styles.retryText}>+ Add New Profile</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Header always visible */}
+      <View
+        style={[
+          styles.header,
+          {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          },
+        ]}
+      >
         <Text style={styles.headerText}>Profiles</Text>
+
+        <View style={{ position: 'relative' }}>
+          <TouchableOpacity
+            onPress={() => setDropdownVisible(prev => !prev)}
+            style={{ padding: 6 }}
+          >
+            <Image
+              source={require('../assets/icons/settingsLogo.png')}
+              style={{ width: 26, height: 26, tintColor: 'white' }}
+            />
+          </TouchableOpacity>
+
+          {dropdownVisible && (
+            <View style={styles.dropdownMenu}>
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setDropdownVisible(false);
+                  navigation.navigate('ChangePasswordScreen');
+                }}
+              >
+                <Text>Change Password</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setDropdownVisible(false);
+                  handleLogout();
+                }}
+              >
+                <Text style={{ color: 'crimson' }}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
 
-      {/* Profile List */}
-      <FlatList
-        data={profiles}
-        keyExtractor={item => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        renderItem={({ item }) => (
-          <View style={styles.profileCard}>
-            <View style={styles.profileInfo}>
-              <Image
-                source={require('../assets/icons/profileIcon.png')}
-                style={styles.profileImage}
-              />
-              <View style={{ marginLeft: 10 }}>
-                <Text style={styles.name}>{item.name}</Text>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor:
-                      item.id === activeProfileId ? '#007bff' : '#5aa9f9',
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 20,
-                    right: 8,
-                  }}
-                  onPress={() => setActiveProfileId(item.id)}
-                  disabled={item.id === activeProfileId}
-                >
-                  <Text
-                    style={{ color: 'white', fontWeight: 'bold', fontSize: 13 }}
-                  >
-                    {item.id === activeProfileId ? 'Active' : 'Switch Profile'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+      {/* Conditional Content */}
+      {loading && (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#4287f5" />
+        </View>
+      )}
 
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() =>
-                  navigation.navigate('ProfileDetails', { id: item.id })
-                }
-                accessibilityRole="button"
-                accessibilityLabel={`Show details for ${item.name}`}
-              >
-                <Text style={styles.editText}>Show</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.editButton,
-                  { backgroundColor: 'crimson', marginLeft: 8 },
-                ]}
-                onPress={() =>
-                  Alert.alert(
-                    'Delete Profile',
-                    'Are you sure you want to delete this profile?',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Delete',
-                        style: 'destructive',
-                        onPress: () => handleDeleteProfile(item.id),
-                      },
-                    ],
-                  )
-                }
-                accessibilityRole="button"
-                accessibilityLabel={`Delete ${item.name}`}
-              >
-                <Text style={styles.editText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+      {!loading && error && (
+        <View style={styles.center}>
+          <Text style={styles.errorText}>Error: {error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchProfiles}>
+            <Text style={styles.retryText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
-      {/* Add New User Button */}
+      {!loading && !error && profiles.length === 0 && (
+        <View style={styles.center}>
+          <Text>No profiles found</Text>
+          <Text>Please add a new user profile</Text>
+        </View>
+      )}
+
+      {!loading && !error && profiles.length > 0 && (
+        <FlatList
+          data={profiles}
+          keyExtractor={item => item.id}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          renderItem={renderProfileItem}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
+      )}
+
+      {/* Add New User Button always visible */}
       <TouchableOpacity
         style={styles.addUserButton}
         onPress={() => navigation.navigate('ProfileForm')}
-        accessibilityRole="button"
-        accessibilityLabel="Add a new user"
       >
         <Text style={styles.addUserText}>+ Add New User</Text>
       </TouchableOpacity>
@@ -294,7 +321,6 @@ const styles = StyleSheet.create({
     tintColor: '#4287f5',
   },
   name: { fontSize: 20, fontWeight: 'bold' },
-  activeText: { fontSize: 14, letterSpacing: 1, color: 'gray' },
 
   editButton: {
     backgroundColor: '#5aa9f9',
@@ -322,4 +348,25 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   retryText: { color: 'white', fontWeight: '600' },
+  dropdownMenu: {
+    position: 'absolute',
+    top: 40,
+    right: 8,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 8,
+    zIndex: 999,
+    minWidth: 160,
+  },
+  dropdownItem: {
+    paddingVertical: 15,
+    paddingHorizontal: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    fontSize: 20,
+  },
 });

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useUser } from '../../backend/context/UserIdContext';
 import { useActiveProfile } from '../../backend/context/ActiveProfileContext';
+import { BASE_URL } from '../../config';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner';
 
@@ -28,8 +29,6 @@ interface IMealResponse {
   message?: string;
 }
 
-const BASE_URL = 'https://ai-nutritionist-5jyf.onrender.com/api/users';
-
 const MealPlanner = () => {
   const [meals, setMeals] = useState<IMealPlan>({
     breakfast: [],
@@ -44,15 +43,19 @@ const MealPlanner = () => {
   const { activeProfileId } = useActiveProfile();
 
   // Fetch meals from backend
+  // Fetch meals from backend
   const fetchMeals = async () => {
-    if (!userId || !activeProfileId) return;
+    if (!userId || !activeProfileId) {
+      setLoading(false); // stop loading if no profile
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch(
-        `${BASE_URL}/${userId}/${activeProfileId}/fetchMeal`,
+        `${BASE_URL}/api/users/${userId}/${activeProfileId}/fetchMeal`,
       );
       const data = (await res.json()) as IMealResponse;
-      // Fix: directly set the returned object
+
       if (data) {
         setMeals({
           breakfast: data.breakfast || [],
@@ -74,11 +77,18 @@ const MealPlanner = () => {
 
   // Add meal
   const addMeal = async () => {
+    if (!activeProfileId) {
+      Alert.alert(
+        'No Profile',
+        'Please create a profile first before adding meals.',
+      );
+      return;
+    }
     if (mealInput.trim() === '') return;
 
     try {
       const res = await fetch(
-        `${BASE_URL}/${userId}/profiles/${activeProfileId}/addMeal`,
+        `${BASE_URL}/api/users/${userId}/profiles/${activeProfileId}/addMeal`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -109,7 +119,7 @@ const MealPlanner = () => {
   const deleteMeal = async (type: MealType, item: string) => {
     try {
       const res = await fetch(
-        `${BASE_URL}/${userId}/profiles/${activeProfileId}/deleteMeal`,
+        `${BASE_URL}/api/users/${userId}/profiles/${activeProfileId}/deleteMeal`,
         {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },

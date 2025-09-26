@@ -12,6 +12,8 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { BASE_URL } from '../../config';
+import { useUser } from '../../backend/context/UserIdContext';
 
 type ProfileFormResponse = {
   data?: string;
@@ -29,6 +31,7 @@ type ProfileFormNavigationProp = NativeStackNavigationProp<
 
 const ProfileForm = () => {
   const navigation = useNavigation<ProfileFormNavigationProp>();
+  const { userId } = useUser();
 
   // States
   const [name, setName] = useState('');
@@ -63,13 +66,10 @@ const ProfileForm = () => {
     if (!validateFields()) return;
 
     try {
-      const userId = await AsyncStorage.getItem('userId');
       if (!userId) {
         Alert.alert('Error', 'User ID not found. Please log in again.');
         return;
       }
-
-      const BASE_URL = 'https://ai-nutritionist-5jyf.onrender.com';
 
       // Check existing profiles safely
       let existingProfiles: any[] = [];

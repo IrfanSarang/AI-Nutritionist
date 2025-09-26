@@ -5,6 +5,7 @@ import React, {
   useState,
   useEffect,
 } from 'react';
+import BASE_URL from '../config/url';
 
 type ActiveProfileContextType = {
   activeProfileId: string | null;
@@ -15,8 +16,6 @@ type ActiveProfileContextType = {
 const ActiveProfileContext = createContext<
   ActiveProfileContextType | undefined
 >(undefined);
-
-const BASE_URL = 'https://ai-nutritionist-5jyf.onrender.com/api/users'; // Your backend URL
 
 export const ActiveProfileProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -36,7 +35,9 @@ export const ActiveProfileProvider: React.FC<{ children: ReactNode }> = ({
 
       try {
         // Assuming backend endpoint returns profile details by ID
-        const res = await fetch(`${BASE_URL}/${activeProfileId}/fetchName`);
+        const res = await fetch(
+          `${BASE_URL}/api/users/${activeProfileId}/fetchName`,
+        );
         const data = await res.json();
 
         if (res.ok && data.name) {

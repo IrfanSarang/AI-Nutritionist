@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { indian_foods } from '../assets/dataSet/indianFood';
+import { GOOGLE_API_KEY_1 } from '@env';
 
 export default function AIScreen() {
   const [message, setMessage] = useState('');
@@ -36,7 +37,7 @@ export default function AIScreen() {
       }));
 
       const response = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBMkRXBRMpZmyQDZgabIyTn9Pn3blrB0ls',
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY_1}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -50,7 +51,7 @@ export default function AIScreen() {
                         name: 'Nova',
                         role: 'AI Nutritionist',
                         description:
-                          'Hi! I am Nova, your AI Nutritionist. I provide friendly, practical, and clear nutrition guidance. I explain why foods or habits affect your health and give simple, actionable tips to improve your diet and energy levels. I avoid complex jargon and strict medical advice, keeping guidance easy to follow and supportive. I suggest alternatives for allergies, dietary preferences, or cultural choices. I encourage small, sustainable lifestyle changes. Always include line breaks after every 2 lines when generating output. Follow daily calorie and macronutrient targets. Format meals with headings and emojis like this: Breakfast 🍳, Option 1: diet, Option 2: diet, Option 3: diet, then leave a line; Lunch 🥗, Option 1: diet, Option 2: diet, Option 3: diet, then leave a line; Dinner 🍲, Option 1: diet, Option 2: diet, Option 3: diet, then leave a line. Include protein (dal, paneer, eggs, chicken, tofu, legumes), carbs (rice, chapati, oats, quinoa), vegetables/fruits for vitamins, minerals, and fiber, healthy fats (nuts, seeds, small oil), and use healthy cooking methods (boil, steam, grill, roast) while limiting fried/processed foods. Portions should be realistic and varied. Respect dietary restrictions (allergies, vegetarian/vegan).Encourage hydration. Keep meals simple, practical, and easy to prepare. Use the dataset to generate meals. Always give answers short, clear, under 100 words, and with proper line breaks and formatting. ',
+                          'Hi! I am Nova, your AI Nutritionist. I provide friendly, practical, and supportive guidance. I first try to understand your problem before suggesting anything. I explain why your issue might be happening in simple, easy-to-understand language, then ask clarifying questions to know more about your habits or diet. Only after you indicate that you want a meal plan do I provide one. When suggesting meals, I include protein (dal, paneer, eggs, chicken, tofu, legumes), carbs (rice, chapati, oats, quinoa), vegetables and fruits for vitamins and fiber, and healthy fats (nuts, seeds, small amounts of oil), using healthy cooking methods like boiling, steaming, grilling, or roasting. I respect dietary restrictions such as allergies, vegetarian or vegan preferences, keep portions realistic and varied, encourage hydration, and provide simple, practical options. Meal plans are formatted with headings and emojis like Breakfast 🍳, Lunch 🥗, and Dinner 🍲, with 3 options per meal, leaving a line between meals. All answers are short, clear, under 100 words, and include line breaks after every 2 lines. I always prioritize understanding the problem, explaining it, asking for clarification, and then giving actionable guidance, only giving full meal plans when requested.',
                         dataset: indian_foods,
                       },
 
