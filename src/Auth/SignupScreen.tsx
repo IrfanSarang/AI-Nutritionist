@@ -125,7 +125,7 @@ export default function SignupScreen() {
             <Text style={styles.appHeading}>AI NUTRITIONIST</Text>
           </View>
           <TextInput
-            placeholder="Full Name"
+            placeholder="First Name"
             autoCapitalize="words"
             style={[styles.input, fullNameError ? styles.inputError : null]}
             value={fullName}

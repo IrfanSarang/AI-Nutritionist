@@ -99,8 +99,8 @@ const Scanner: React.FC = () => {
           <TouchableOpacity
             style={{
               marginTop: 12,
-              backgroundColor: '#1e90ff',
-              paddingVertical: 10,
+              backgroundColor: '#5aa9f9',
+              paddingVertical: 13,
               paddingHorizontal: 20,
               borderRadius: 8,
             }}
@@ -111,7 +111,7 @@ const Scanner: React.FC = () => {
               navigation.navigate('ProductDetails', { code: scannedCode });
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+            <Text style={{ color: '#fff', fontWeight: '500', fontSize: 16 }}>
               Know More About the Product
             </Text>
           </TouchableOpacity>

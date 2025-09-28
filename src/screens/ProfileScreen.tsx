@@ -285,8 +285,9 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 
   header: {
-    backgroundColor: '#4287f5',
-    padding: 14,
+    backgroundColor: '#4A90E2',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     alignItems: 'center',
     borderRadius: 2,
     marginBottom: 20,

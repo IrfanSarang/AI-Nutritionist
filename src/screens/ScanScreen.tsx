@@ -41,8 +41,8 @@ export default function ScanScren() {
 const styles = StyleSheet.create({
   container: { backgroundColor: '#f6f6f6ff', zIndex: -2, flex: 1 },
   header: {
-    backgroundColor: '#007bff',
-    padding: 10,
+    backgroundColor: '#4A90E2',
+    paddingVertical: 18,
   },
   headerText: {
     fontSize: 25,
@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 20,
     elevation: 5,
+    bottom: 10,
   },
   cameraButtonText: {
     color: '#fff',
