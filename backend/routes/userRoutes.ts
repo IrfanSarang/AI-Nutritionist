@@ -1,4 +1,4 @@
-import express from 'express';
+import express from "express";
 import {
   registerUser,
   loginUser,
@@ -6,61 +6,66 @@ import {
   getProfiles,
   fetchData,
   deleteProfile,
-} from '../controllers/userController';
+} from "../controllers/userController";
 
 import {
   getProfileById,
   updateProfileById,
-} from '../controllers/profileFetchController';
+} from "../controllers/profileFetchController";
 
 import {
   fetchMeal,
   addMealItem,
   deleteMealItem,
   fetchProfile,
-} from '../controllers/planController';
+} from "../controllers/planController";
 
-import { fetchProfileName } from '../controllers/nameController';
-import {
-  forgotPassword,
-  verifyOtp,
-  resetPassword,
-} from '../controllers/forgetPassController';
+import { fetchProfileName } from "../controllers/nameController";
+
+import { chatWithAI } from "../controllers/chatController";
+
+import { getProductAIInsight } from "../controllers/aiInsightsController";
+
+import { getProfileAIDiagnosis } from "../controllers/aiInsightsController";
 
 const router = express.Router();
 
 //User Authentication
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
 //ProfileManagement
-router.post('/addProfile', addProfile);
-router.get('/:userId/profiles', getProfiles);
+router.post("/addProfile", addProfile);
+router.get("/:userId/profiles", getProfiles);
 
 // Fetch all users + profiles (admin/global)
-router.get('/fetchData', fetchData);
+router.get("/fetchData", fetchData);
 
 //deleteing profile
-router.delete('/:userId/profiles/:profileId', deleteProfile);
+router.delete("/:userId/profiles/:profileId", deleteProfile);
 
 //editing profile details + fetchig
-router.get('/profile/:id', getProfileById);
-router.put('/profile/:id', updateProfileById);
+router.get("/profile/:id", getProfileById);
+router.put("/profile/:id", updateProfileById);
 
 //Fetching meal
-router.get('/:userId/:profileId/fetchMeal', fetchMeal);
-router.post('/:userId/profiles/:profileId/addMeal', addMealItem);
-router.delete('/:userId/profiles/:profileId/deleteMeal', deleteMealItem);
+router.get("/:userId/:profileId/fetchMeal", fetchMeal);
+router.post("/:userId/profiles/:profileId/addMeal", addMealItem);
+router.delete("/:userId/profiles/:profileId/deleteMeal", deleteMealItem);
 
 //fetching profile
-router.get('/:userId/firstProfile', fetchProfile);
+router.get("/:userId/firstProfile", fetchProfile);
 
 //fetching profileName
-router.get('/:profileId/fetchName', fetchProfileName);
+router.get("/:profileId/fetchName", fetchProfileName);
 
-//forget password
-router.post('/forgot-password', forgotPassword);
-router.post('/verify-otp', verifyOtp);
-router.post('/reset-password', resetPassword);
+//AI Services
+router.post("/chat", chatWithAI);
+
+//Ai Product Insights
+router.post("/product", getProductAIInsight);
+
+//Ai Diagnosis
+router.post("/diagnosis", getProfileAIDiagnosis);
 
 export default router;
