@@ -4,7 +4,9 @@
 
 #Environment files
 .env
-Backend/.env
+backend/.env
+**/.env
+
 
 # Xcode
 #
