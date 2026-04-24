@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import mongoose, { Schema, Document, Mongoose } from "mongoose";
+=======
+import mongoose, { Schema, Document, Mongoose } from 'mongoose';
+>>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637
 
 export interface IPlan {
   breakfast: string[];
@@ -50,7 +54,10 @@ export interface IUser extends Document {
   profile: IProfile[];
   resetToken?: string | null;
   resetTokenExpiry?: Date | null;
+<<<<<<< HEAD
   otpAttempts?: number;
+=======
+>>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637
 }
 
 const userSchema: Schema = new Schema({
@@ -58,10 +65,18 @@ const userSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   profile: { type: [profileSchema], default: [] },
+<<<<<<< HEAD
   resetToken: { type: String, default: "" },
   resetTokenExpiry: { type: Date, default: null },
   otpAttempts: { type: Number, default: 0 },
 });
 
 const User = mongoose.model<IUser>("User", userSchema);
+=======
+  resetToken: { type: String, default: '' },
+  resetTokenExpiry: { type: Date, default: null },
+});
+
+const User = mongoose.model<IUser>('User', userSchema);
+>>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637
 export default User;
