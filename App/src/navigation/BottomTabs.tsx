@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 import AIScreen from '../screens/AIScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -12,9 +13,9 @@ const BottomTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarStyle: {
-          height: 75,
-        },
+        tabBarStyle: { height: 75 },
+        tabBarActiveTintColor: '#1e90ff',
+        tabBarInactiveTintColor: '#aaaaaa',
       }}
     >
       {/* Home Tab */}
@@ -27,13 +28,16 @@ const BottomTabs = () => {
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '600',
-            color: '#1e90ff',
             paddingTop: 2,
           },
-          tabBarIcon: () => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={require('../assets/icons/homeIcon.png')}
-              style={{ width: 26, height: 26, tintColor: '#1e90ff' }}
+              style={{
+                width: 26,
+                height: 26,
+                tintColor: focused ? '#1e90ff' : '#aaaaaa',
+              }}
             />
           ),
         }}
@@ -49,13 +53,16 @@ const BottomTabs = () => {
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '600',
-            color: '#1e90ff',
             paddingTop: 2,
           },
-          tabBarIcon: () => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={require('../assets/icons/scanIcon.png')}
-              style={{ width: 26, height: 26, tintColor: '#1e90ff' }}
+              style={{
+                width: 26,
+                height: 26,
+                tintColor: focused ? '#1e90ff' : '#aaaaaa',
+              }}
             />
           ),
         }}
@@ -71,13 +78,16 @@ const BottomTabs = () => {
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '600',
-            color: '#1e90ff',
             paddingTop: 2,
           },
-          tabBarIcon: () => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={require('../assets/icons/robotLogo.png')}
-              style={{ width: 40, height: 40 }}
+              style={{
+                width: 40,
+                height: 40,
+                tintColor: focused ? '#1e90ff' : '#aaaaaa',
+              }}
             />
           ),
         }}
@@ -93,13 +103,16 @@ const BottomTabs = () => {
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '600',
-            color: '#1e90ff',
             paddingTop: 2,
           },
-          tabBarIcon: () => (
+          tabBarIcon: ({ focused }) => (
             <Image
               source={require('../assets/icons/profileIcon.png')}
-              style={{ width: 26, height: 26, tintColor: '#1e90ff' }}
+              style={{
+                width: 26,
+                height: 26,
+                tintColor: focused ? '#1e90ff' : '#aaaaaa',
+              }}
             />
           ),
         }}

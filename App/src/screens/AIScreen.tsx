@@ -8,9 +8,11 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
-import { indian_foods } from '../assets/dataSet/indianFood';
 import BASE_URL from '../config/url';
+import { authFetch } from '../utils/api';
 
 export default function AIScreen() {
   const [message, setMessage] = useState('');
@@ -26,12 +28,11 @@ export default function AIScreen() {
   const sendMessageToAI = async () => {
     if (!message.trim()) return;
 
-    // Add user message instantly
     setChat(prev => [...prev, { sender: 'user', text: message }]);
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/api/users/chat`, {
+      const response = await authFetch(`${BASE_URL}/api/users/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +73,6 @@ export default function AIScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Image
           source={require('../assets/icons/botLogoback.png')}
@@ -87,50 +87,49 @@ export default function AIScreen() {
         </View>
       </View>
 
-      {/* Chat area */}
-      <ScrollView ref={scrollViewRef} style={styles.chatArea}>
-        {chat.map((c, index) => (
-          <View
-            key={index}
-            style={c.sender === 'bot' ? styles.botRow : styles.userRow}
-          >
-            {c.sender === 'bot' && (
-              <Image
-                source={require('../assets/icons/askAiLogo.png')}
-                style={styles.chatIcon}
-              />
-            )}
+      {/* ✅ Keyboard dismiss wrapper */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView ref={scrollViewRef} style={styles.chatArea}>
+          {chat.map((c, index) => (
             <View
-              style={c.sender === 'bot' ? styles.botBubble : styles.userBubble}
+              key={index}
+              style={c.sender === 'bot' ? styles.botRow : styles.userRow}
             >
-              <Text style={styles.chatText}>{c.text}</Text>
+              {c.sender === 'bot' && (
+                <Image
+                  source={require('../assets/icons/askAiLogo.png')}
+                  style={styles.chatIcon}
+                />
+              )}
+
+              <View
+                style={
+                  c.sender === 'bot' ? styles.botBubble : styles.userBubble
+                }
+              >
+                <Text style={styles.chatText}>{c.text}</Text>
+              </View>
+
+              {c.sender === 'user' && (
+                <Image
+                  source={require('../assets/icons/profileIcon.png')}
+                  style={styles.chatIconUser}
+                />
+              )}
             </View>
-            {c.sender === 'user' && (
-              <Image
-                source={require('../assets/icons/profileIcon.png')}
-                style={styles.chatIconUser}
-              />
-            )}
-          </View>
-        ))}
+          ))}
 
-        {isLoading && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginVertical: 5,
-            }}
-          >
-            <ActivityIndicator size="small" color="#4A90E2" />
-            <Text style={{ marginLeft: 5, color: '#4A90E2' }}>
-              Nova is typing...
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+          {isLoading && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
+              <ActivityIndicator size="small" color="#4A90E2" />
+              <Text style={{ marginLeft: 5, color: '#4A90E2' }}>
+                Nova is typing...
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+      </TouchableWithoutFeedback>
 
-      {/* Input row */}
       <View style={styles.inputRow}>
         <TextInput
           style={styles.textInput}
@@ -139,15 +138,21 @@ export default function AIScreen() {
           value={message}
           onChangeText={setMessage}
         />
-        <TouchableOpacity onPress={sendMessageToAI}>
+
+        {/* ✅ disabled while loading */}
+        <TouchableOpacity
+          onPress={sendMessageToAI}
+          disabled={isLoading}
+        >
           <Image
             source={require('../assets/icons/sendIcon.png')}
-            style={styles.sendIcon}
+            style={[
+              styles.sendIcon,
+              isLoading && { opacity: 0.4 },
+            ]}
           />
         </TouchableOpacity>
       </View>
-
-      {/* Clear Chat Button */}
     </View>
   );
 }
@@ -217,7 +222,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     height: 35,
   },
-  sendIcon: { width: 35, height: 35, marginLeft: 5, tintColor: '#fff' },
+  sendIcon: {
+    width: 35,
+    height: 35,
+    marginLeft: 5,
+    tintColor: '#fff',
+  },
   clearButton: {
     backgroundColor: '#f53b2eff',
     paddingVertical: 8,

@@ -10,13 +10,18 @@ import {
 } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { GOOGLE_API_KEY_2 } from '@env';
+
+import BASE_URL from '../config/url';
+import { authFetch } from '../utils/api';
 
 type RootStackParamList = {
   ProductDetails: { code: string };
 };
 
-type ProductDetailsRouteProp = RouteProp<RootStackParamList, 'ProductDetails'>;
+type ProductDetailsRouteProp = RouteProp<
+  RootStackParamList,
+  'ProductDetails'
+>;
 
 interface ProductData {
   product_name?: string;
@@ -37,10 +42,12 @@ const ProductDetails: React.FC = () => {
   const route = useRoute<ProductDetailsRouteProp>();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const { code } = route.params;
 
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<ProductData | null>(null);
+
   const [aiInsight, setAiInsight] = useState<string>(
     'AI insights not generated yet.',
   );
@@ -53,23 +60,25 @@ const ProductDetails: React.FC = () => {
           `https://world.openfoodfacts.org/api/v0/product/${code}.json`,
         );
         const data: any = await res.json();
+
         if (data.status === 1) {
           setProduct(data.product);
         } else {
           setProduct(null);
         }
       } catch (error) {
-        console.error('Product fetch error:', error);
         setProduct(null);
       } finally {
         setLoading(false);
       }
     };
+
     fetchProduct();
   }, [code]);
 
-  const fetchAIInsights = async (ingredients: string) => {
-    if (!ingredients) {
+  // ✅ SECURE AI CALL (NO FRONTEND API KEY)
+  const fetchAIInsights = async () => {
+    if (!product?.ingredients_text) {
       setAiInsight('No ingredients available for AI insights.');
       return;
     }
@@ -77,24 +86,21 @@ const ProductDetails: React.FC = () => {
     setAiLoading(true);
 
     try {
-      const response = await fetch(
-        'http://192.168.0.102:5000/api/users/product',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ingredients,
-          }),
+      const aiRes = await authFetch(`${BASE_URL}/api/users/product`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({
+          ingredients: product.ingredients_text,
+        }),
+      });
 
-      const data = await response.json();
-      setAiInsight(data.reply);
+      const aiData = await aiRes.json();
+      setAiInsight(aiData.reply || 'No insights available.');
     } catch (error) {
-      console.error('Backend AI error:', error);
-      setAiInsight('Failed to fetch AI insights.');
+      console.error(error);
+      setAiInsight('Could not load AI insights.');
     } finally {
       setAiLoading(false);
     }
@@ -126,6 +132,7 @@ const ProductDetails: React.FC = () => {
             style={styles.backImage}
           />
         </TouchableOpacity>
+
         <Text style={styles.headerText}>Product Details</Text>
       </View>
 
@@ -146,20 +153,27 @@ const ProductDetails: React.FC = () => {
             <Text style={styles.detail}>Brand: {product.brands}</Text>
           )}
           {product.categories && (
-            <Text style={styles.detail}>Categories: {product.categories}</Text>
+            <Text style={styles.detail}>
+              Categories: {product.categories}
+            </Text>
           )}
         </View>
 
         {product.ingredients_text && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
-            <Text style={styles.sectionText}>{product.ingredients_text}</Text>
+            <Text style={styles.sectionText}>
+              {product.ingredients_text}
+            </Text>
           </View>
         )}
 
         {product.nutriments && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Nutritional Information</Text>
+            <Text style={styles.sectionTitle}>
+              Nutritional Information
+            </Text>
+
             {[
               {
                 label: 'Calories',
@@ -167,7 +181,11 @@ const ProductDetails: React.FC = () => {
                 unit: 'kcal',
               },
               { label: 'Fat', value: product.nutriments.fat, unit: 'g' },
-              { label: 'Sugars', value: product.nutriments.sugars, unit: 'g' },
+              {
+                label: 'Sugars',
+                value: product.nutriments.sugars,
+                unit: 'g',
+              },
               {
                 label: 'Proteins',
                 value: product.nutriments.proteins,
@@ -185,9 +203,10 @@ const ProductDetails: React.FC = () => {
           </View>
         )}
 
-        {/* AI Insights Card */}
+        {/* AI SECTION */}
         <View style={[styles.card, styles.aiCard]}>
           <Text style={styles.sectionTitle}>A.I. Insight</Text>
+
           {aiLoading ? (
             <ActivityIndicator size="small" color="#1e90ff" />
           ) : (
@@ -196,23 +215,22 @@ const ProductDetails: React.FC = () => {
 
           <TouchableOpacity
             style={styles.aiButton}
-            onPress={() => fetchAIInsights(product?.ingredients_text || '')}
+            onPress={fetchAIInsights}
           >
-            <Text style={styles.aiButtonText}>Generate AI Insights</Text>
+            <Text style={styles.aiButtonText}>
+              Generate AI Insights
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Nutritionist Tips */}
         <View style={[styles.card, styles.tipsCard]}>
           <Text style={styles.sectionTitle}>Nutritionist Tips</Text>
           <Text style={styles.sectionText}>
-            • Check sugar and salt intake if you have diabetes or hypertension.
-            {'\n'}
-            {'\n'}• High fat products should be consumed in moderation.
-            {'\n'}
-            {'\n'}• Prefer products with more protein and natural ingredients.
-            {'\n'}
-            {'\n'}• Read ingredients carefully for allergens.
+            • Check sugar and salt intake if you have diabetes or
+            hypertension.{'\n\n'}• High fat products should be consumed in
+            moderation.{'\n\n'}• Prefer products with more protein and
+            natural ingredients.{'\n\n'}• Read ingredients carefully for
+            allergens.
           </Text>
         </View>
       </ScrollView>
@@ -228,48 +246,33 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: '#4A90E2',
     paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
     elevation: 5,
   },
   backButton: { marginRight: 13, marginLeft: 6 },
   backImage: {
     width: 30,
     height: 30,
-    resizeMode: 'contain',
     tintColor: '#fff',
   },
   headerText: {
     color: '#fff',
     fontSize: 27,
     fontWeight: 'bold',
-    letterSpacing: 1.5,
   },
   container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { fontSize: 18, color: 'red', textAlign: 'center' },
+  errorText: { fontSize: 18, color: 'red' },
   image: {
     width: 220,
     height: 220,
-    resizeMode: 'contain',
     alignSelf: 'center',
     marginBottom: 16,
     borderRadius: 12,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
   },
   productName: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 8,
-    color: '#333',
   },
   infoRow: { marginBottom: 12 },
   detail: { fontSize: 16, textAlign: 'center', color: '#555' },
@@ -278,40 +281,26 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 3,
   },
   aiCard: { backgroundColor: '#e0f7fa' },
   tipsCard: { backgroundColor: '#fff3e0' },
-  sectionTitle: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 8,
-    color: '#222',
-  },
-  sectionText: { fontSize: 17, lineHeight: 22, color: '#444' },
+  sectionTitle: { fontWeight: 'bold', fontSize: 18 },
+  sectionText: { fontSize: 16, lineHeight: 22 },
   nutriRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
   },
-  nutriLabel: { fontSize: 15, color: '#555' },
-  nutriValue: { fontSize: 15, fontWeight: 'bold', color: '#111' },
+  nutriLabel: { fontSize: 15 },
+  nutriValue: { fontSize: 15, fontWeight: 'bold' },
   aiButton: {
     marginTop: 12,
     backgroundColor: '#1e90ff',
-    paddingVertical: 10,
+    padding: 10,
     borderRadius: 8,
     alignItems: 'center',
   },
-  aiButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  aiButtonText: { color: '#fff', fontWeight: 'bold' },
 });
 
 export default ProductDetails;

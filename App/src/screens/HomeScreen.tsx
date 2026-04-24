@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  TextInput,
   ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -13,12 +12,14 @@ import MealPlanner from '../components/MealPlanner';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useActiveProfile } from '../context/ActiveProfileContext';
+import WaterTracker from '../components/WaterTracker';
 
 type RootStackParamList = {
-  ConsumptionPlanner: undefined; // corrected spelling
+  ConsumptionPlanner: undefined;
   HealthTips: undefined;
   ProfileScreen: undefined;
-  AI: undefined; // added for 2nd card navigation
+  AI: undefined;
+  RecipeScreen: undefined;
 };
 
 const HomeScreen = () => {
@@ -60,10 +61,22 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
 
+      {/* PROFILE NUDGE */}
+      {!activeProfileName && (
+        <TouchableOpacity
+          style={styles.profileNudge}
+          onPress={() => navigation.navigate('ProfileScreen')}
+        >
+          <Text style={styles.profileNudgeText}>
+            Set up your profile to get personalized recommendations
+          </Text>
+        </TouchableOpacity>
+      )}
+
       {/* Search Input */}
       <TouchableOpacity
         style={styles.inputContainer}
-        onPress={() => navigation.navigate('AI')} // 👈 navigate to AI screen
+        onPress={() => navigation.navigate('AI')}
       >
         <Image
           source={require('../assets/icons/askAiLogo.png')}
@@ -75,7 +88,6 @@ const HomeScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Two Cards */}
         <View style={styles.twoCardContainer}>
-          {/* Card One */}
           <TouchableOpacity
             style={styles.cardOne}
             onPress={() => navigation.navigate('ConsumptionPlanner')}
@@ -86,7 +98,6 @@ const HomeScreen = () => {
             />
           </TouchableOpacity>
 
-          {/* Card Two */}
           <TouchableOpacity
             style={styles.cardTwo}
             onPress={() => navigation.navigate('HealthTips')}
@@ -98,7 +109,23 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Get Recipe Ideas Card */}
+        <TouchableOpacity
+          style={styles.recipeCard}
+          onPress={() => navigation.navigate('RecipeScreen')}
+        >
+          <Text style={styles.recipeCardEmoji}>🍽️</Text>
+          <View style={styles.recipeCardText}>
+            <Text style={styles.recipeCardTitle}>Get Recipe Ideas</Text>
+            <Text style={styles.recipeCardSubtitle}>
+              Turn your ingredients into 2 AI-generated recipes
+            </Text>
+          </View>
+          <Text style={styles.recipeCardArrow}>›</Text>
+        </TouchableOpacity>
+
         {/* Meal Planner */}
+        <WaterTracker />
         <MealPlanner />
       </ScrollView>
     </LinearGradient>
@@ -142,6 +169,19 @@ const styles = StyleSheet.create({
     tintColor: '#fff',
     elevation: 7,
   },
+  profileNudge: {
+    backgroundColor: '#FFF3CD',
+    margin: 16,
+    padding: 12,
+    borderRadius: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFC107',
+  },
+  profileNudgeText: {
+    color: '#856404',
+    fontSize: 14,
+    fontWeight: '500',
+  },
   inputContainer: {
     width: '90%',
     height: 50,
@@ -165,12 +205,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: 'rgba(0,0,0,0.5)',
     marginHorizontal: 5,
-  },
-
-  searchInput: {
-    fontSize: 17,
-    color: '#000',
-    height: '100%',
   },
   twoCardContainer: {
     height: 250,
@@ -211,6 +245,45 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 24,
     left: 4,
+  },
+
+  /* Recipe Card */
+  recipeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    marginHorizontal: 25,
+    marginBottom: 14,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    elevation: 7,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  recipeCardEmoji: {
+    fontSize: 32,
+    marginRight: 14,
+  },
+  recipeCardText: {
+    flex: 1,
+  },
+  recipeCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000',
+  },
+  recipeCardSubtitle: {
+    fontSize: 13,
+    color: '#777',
+    marginTop: 3,
+  },
+  recipeCardArrow: {
+    fontSize: 28,
+    color: '#1e90ff',
+    fontWeight: '300',
   },
 });
 

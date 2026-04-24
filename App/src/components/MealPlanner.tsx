@@ -14,6 +14,7 @@ import {
 import { useUser } from '../context/UserIdContext';
 import { useActiveProfile } from '../context/ActiveProfileContext';
 import BASE_URL from '../config/url';
+import { authFetch } from '../utils/api';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner';
 
@@ -22,6 +23,7 @@ interface IMealPlan {
   lunch: string[];
   dinner: string[];
 }
+
 interface IMealResponse {
   breakfast: string[];
   lunch: string[];
@@ -35,25 +37,29 @@ const MealPlanner = () => {
     lunch: [],
     dinner: [],
   });
+
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentMealType, setCurrentMealType] = useState<MealType>('breakfast');
+  const [currentMealType, setCurrentMealType] =
+    useState<MealType>('breakfast');
   const [mealInput, setMealInput] = useState('');
+
   const { userId } = useUser();
   const { activeProfileId } = useActiveProfile();
 
-  // Fetch meals from backend
-  // Fetch meals from backend
   const fetchMeals = async () => {
     if (!userId || !activeProfileId) {
-      setLoading(false); // stop loading if no profile
+      setLoading(false);
       return;
     }
+
     setLoading(true);
+
     try {
-      const res = await fetch(
+      const res = await authFetch(
         `${BASE_URL}/api/users/${userId}/${activeProfileId}/fetchMeal`,
       );
+
       const data = (await res.json()) as IMealResponse;
 
       if (data) {
@@ -75,7 +81,6 @@ const MealPlanner = () => {
     fetchMeals();
   }, [userId, activeProfileId]);
 
-  // Add meal
   const addMeal = async () => {
     if (!activeProfileId) {
       Alert.alert(
@@ -84,21 +89,23 @@ const MealPlanner = () => {
       );
       return;
     }
+
     if (mealInput.trim() === '') return;
 
     try {
-      const res = await fetch(
+      const res = await authFetch(
         `${BASE_URL}/api/users/${userId}/profiles/${activeProfileId}/addMeal`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mealType: currentMealType,
             item: mealInput.trim(),
           }),
         },
       );
+
       const data = (await res.json()) as IMealResponse;
+
       if (res.ok) {
         setMeals(prev => ({
           ...prev,
@@ -115,18 +122,21 @@ const MealPlanner = () => {
     }
   };
 
-  // Delete meal
   const deleteMeal = async (type: MealType, item: string) => {
     try {
-      const res = await fetch(
+      const res = await authFetch(
         `${BASE_URL}/api/users/${userId}/profiles/${activeProfileId}/deleteMeal`,
         {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mealType: type, item }),
+          body: JSON.stringify({
+            mealType: type,
+            item,
+          }),
         },
       );
+
       const data = (await res.json()) as IMealResponse;
+
       if (res.ok) {
         setMeals(prev => ({
           ...prev,
@@ -145,6 +155,7 @@ const MealPlanner = () => {
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{title}</Text>
+
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => {
@@ -155,6 +166,7 @@ const MealPlanner = () => {
           <Text style={styles.addText}>+ Add</Text>
         </TouchableOpacity>
       </View>
+
       {meals[type].length === 0 ? (
         <Text style={{ color: '#888', marginBottom: 8 }}>No items added</Text>
       ) : (
@@ -166,6 +178,7 @@ const MealPlanner = () => {
               <Text style={styles.mealText}>
                 Option {index + 1}: {item}
               </Text>
+
               <TouchableOpacity
                 onPress={() => deleteMeal(type, item)}
                 style={styles.deleteButton}
@@ -180,10 +193,11 @@ const MealPlanner = () => {
     </View>
   );
 
-  if (loading)
+  if (loading) {
     return (
       <ActivityIndicator size="large" color="#007AFF" style={{ flex: 1 }} />
     );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -191,21 +205,23 @@ const MealPlanner = () => {
       {renderMealSection('Lunch', 'lunch')}
       {renderMealSection('Dinner', 'dinner')}
 
-      {/* Modal for adding meal */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalBackground}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Add {currentMealType}</Text>
+
             <TextInput
               style={styles.input}
               placeholder="Enter meal name"
               value={mealInput}
               onChangeText={setMealInput}
             />
+
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.saveButton} onPress={addMeal}>
                 <Text style={styles.buttonText}>Save</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={() => setModalVisible(false)}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,13 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import BASE_URL from '../config/url';
 
-// Define your stack params
 type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
@@ -29,43 +29,43 @@ export default function SignupScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const [fullName, setFullName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [fullNameError, setFullNameError] = React.useState('');
-  const [emailError, setEmailError] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState('');
+  const [fullNameError, setFullNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    // Full name validation: only letters and spaces, min 2 characters
-    const validateName = (name: string) => /^[a-zA-Z ]{2,30}$/.test(name);
+    const validateName = (name: string) =>
+      /^[a-zA-Z ]{2,30}$/.test(name);
 
-    // Email validation
     const validateEmail = (email: string) => {
       const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
       return emailPattern.test(email);
     };
 
-    // Password validation: minimum 8 characters
-    const validatePassword = (password: string) => password.length >= 8;
+    const validatePassword = (password: string) =>
+      password.length >= 8;
 
-    // Implement signup logic here
     try {
-      // Reset errors
       setFullNameError('');
       setEmailError('');
       setPasswordError('');
 
-      // Check validations and set inline errors
       let hasError = false;
 
       if (!fullName.trim()) {
         setFullNameError('Full name is required.');
         hasError = true;
       } else if (!validateName(fullName.trim())) {
-        setFullNameError('Name should be 2-30 letters and spaces only.');
+        setFullNameError(
+          'Name should be 2-30 letters and spaces only.',
+        );
         hasError = true;
       }
 
@@ -81,49 +81,63 @@ export default function SignupScreen() {
         setPasswordError('Password is required.');
         hasError = true;
       } else if (!validatePassword(password)) {
-        setPasswordError('Password must be at least 8 characters long.');
+        setPasswordError(
+          'Password must be at least 8 characters long.',
+        );
         hasError = true;
       }
 
-      // Stop if any validation fails
       if (hasError) return;
 
-      const response = await fetch(`${BASE_URL}/api/users/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: fullName,
-          email: email.trim().toLowerCase(),
-          password: password,
-        }),
-      });
+      setLoading(true);
+
+      const response = await fetch(
+        `${BASE_URL}/api/users/register`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName,
+            email: email.trim().toLowerCase(),
+            password,
+          }),
+        },
+      );
 
       const data = (await response.json()) as SignupResponse;
 
       if (response.ok) {
-        Alert.alert('Success', data.message || 'User registered successfully', [
-          {
-            text: 'Now Log In with your new account',
-            onPress: () => navigation.navigate('Login'),
-          },
-        ]);
+        Alert.alert(
+          'Success',
+          data.message || 'User registered successfully',
+          [
+            {
+              text: 'Now Log In with your new account',
+              onPress: () => navigation.navigate('Login'),
+            },
+          ],
+        );
       } else {
-        Alert.alert('Signup Failed', data.message || 'Something went wrong');
+        Alert.alert(
+          'Signup Failed',
+          data.message || 'Something went wrong',
+        );
       }
     } catch (error) {
       console.error('Signup error:', error);
       Alert.alert('Error', String(error));
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <LinearGradient colors={['#00aaff', '#ffffff']} style={styles.container}>
-        {/* Signup Box */}
         <View style={styles.box}>
-          <View>
-            <Text style={styles.appHeading}>AI NUTRITIONIST</Text>
-          </View>
+          <Text style={styles.appHeading}>AI NUTRITIONIST</Text>
+
+          {/* Full Name */}
           <TextInput
             placeholder="First Name"
             autoCapitalize="words"
@@ -138,6 +152,7 @@ export default function SignupScreen() {
             <Text style={styles.errorText}>{fullNameError}</Text>
           ) : null}
 
+          {/* Email */}
           <TextInput
             placeholder="Email"
             keyboardType="email-address"
@@ -153,6 +168,7 @@ export default function SignupScreen() {
             <Text style={styles.errorText}>{emailError}</Text>
           ) : null}
 
+          {/* Password */}
           <View style={{ width: '100%', position: 'relative' }}>
             <TextInput
               placeholder="Password"
@@ -164,39 +180,53 @@ export default function SignupScreen() {
                 if (passwordError) setPasswordError('');
               }}
             />
+
             <TouchableOpacity
               onPressIn={() => setShowPassword(true)}
               onPressOut={() => setShowPassword(false)}
               style={{ position: 'absolute', right: 15, top: 20 }}
             >
-              <Text style={{ color: '#1e90ff', fontWeight: '500' }}>Show</Text>
+              <Text style={{ color: '#1e90ff', fontWeight: '500' }}>
+                Show
+              </Text>
             </TouchableOpacity>
           </View>
+
           {passwordError ? (
             <Text style={styles.errorText}>{passwordError}</Text>
           ) : null}
 
+          {/* SIGN UP BUTTON (UPDATED WITH LOADER) */}
           <TouchableOpacity
             style={[
               styles.button,
-              (!fullName || !email || !password) && { opacity: 0.6 },
+              (loading || !fullName || !email || !password) && {
+                opacity: 0.6,
+              },
             ]}
             onPress={handleSignup}
-            disabled={!fullName || !email || !password}
+            disabled={loading || !fullName || !email || !password}
           >
-            <Text style={styles.buttonText}>Sign Up</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Sign Up</Text>
+            )}
           </TouchableOpacity>
 
-          {/* ✅ "Already have an account? Log In" in one line */}
+          {/* Login Row */}
           <View style={styles.loginRow}>
-            <Text style={styles.signupText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.signupText}>
+              Already have an account?{' '}
+            </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Login')}
+            >
               <Text style={styles.loginText}>Log In</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Background Image */}
         <Image
           source={require('../assets/images/SignUpBot.png')}
           style={styles.image}
@@ -208,9 +238,7 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   box: {
     marginTop: 45,
     marginHorizontal: 20,
@@ -223,12 +251,11 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     fontSize: 22,
     fontWeight: '600',
-    color: '#052d7dff', // modern blue accent
+    color: '#052d7dff',
     textAlign: 'center',
-    letterSpacing: 0, // spaced-out for premium look
     textTransform: 'uppercase',
     marginBottom: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.15)', // subtle shadow
+    textShadowColor: 'rgba(0, 0, 0, 0.15)',
     textShadowOffset: { width: 3, height: 2 },
     textShadowRadius: 10,
   },
@@ -249,11 +276,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   loginRow: {
     flexDirection: 'row',
     marginTop: 15,

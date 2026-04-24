@@ -15,9 +15,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../context/UserIdContext';
 import BASE_URL from '../config/url';
 import LinearGradient from 'react-native-linear-gradient';
+import { authFetch } from '../utils/api';
 
 export default function ChangePasswordScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { userId } = useUser();
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -39,12 +40,10 @@ export default function ChangePasswordScreen() {
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
-  // Real-time validation
   useEffect(() => {
     const tempErrors = { current: '', new: '', confirm: '' };
     let disableButton = false;
 
-    // Current password
     if (touched.current) {
       if (!currentPassword) {
         tempErrors.current = 'Current password is required';
@@ -54,7 +53,6 @@ export default function ChangePasswordScreen() {
       disableButton = true;
     }
 
-    // New password
     if (touched.new) {
       if (!newPassword) {
         tempErrors.new = 'New password is required';
@@ -67,7 +65,6 @@ export default function ChangePasswordScreen() {
       disableButton = true;
     }
 
-    // Confirm password
     if (touched.confirm) {
       if (!confirmPassword) {
         tempErrors.confirm = 'Please confirm new password';
@@ -92,17 +89,14 @@ export default function ChangePasswordScreen() {
 
     try {
       setLoading(true);
-      const res = await fetch(
-        `${BASE_URL}/api/users/${userId}/change-password`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            currentPassword,
-            newPassword,
-          }),
-        },
-      );
+
+      const res = await authFetch(`${BASE_URL}/api/users/change-password`, {
+        method: 'POST',
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
 
       if (!res.ok) {
         const json: any = await res.json();
@@ -140,7 +134,6 @@ export default function ChangePasswordScreen() {
             placeholderTextColor="#888"
             onFocus={() => setTouched(prev => ({ ...prev, current: true }))}
           />
-
           {errors.current ? (
             <Text style={styles.error}>{errors.current}</Text>
           ) : null}
@@ -179,6 +172,13 @@ export default function ChangePasswordScreen() {
             ) : (
               <Text style={styles.buttonText}>Change Password</Text>
             )}
+          </TouchableOpacity>
+
+          {/* Forgot Password Link */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ForgotPassword')}
+          >
+            <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
         </ScrollView>
       </LinearGradient>
@@ -220,6 +220,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 15,
   },
-  buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
-  error: { color: 'crimson', fontSize: 13, marginBottom: 10 },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  error: {
+    color: 'crimson',
+    fontSize: 13,
+    marginBottom: 10,
+  },
+  forgotText: {
+    color: '#4A90E2',
+    textAlign: 'center',
+    marginTop: 15,
+  },
 });

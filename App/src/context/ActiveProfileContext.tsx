@@ -1,3 +1,5 @@
+// App/src/context/ActiveProfileContext.tsx
+
 import React, {
   createContext,
   ReactNode,
@@ -5,7 +7,9 @@ import React, {
   useState,
   useEffect,
 } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BASE_URL from '../config/url';
+import { authFetch } from '../utils/api';
 
 type ActiveProfileContextType = {
   activeProfileId: string | null;
@@ -20,12 +24,36 @@ const ActiveProfileContext = createContext<
 export const ActiveProfileProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
-  const [activeProfileName, setActiveProfileName] = useState<string | null>(
-    null,
-  );
+  const [activeProfileId, setActiveProfileIdState] = useState<
+    string | null
+  >(null);
 
-  // Whenever profileId changes, fetch name from backend
+  const [activeProfileName, setActiveProfileName] = useState<
+    string | null
+  >(null);
+
+  // Load saved profile on mount
+  useEffect(() => {
+    const loadSavedProfile = async () => {
+      const saved = await AsyncStorage.getItem('profileId');
+      if (saved) setActiveProfileIdState(saved);
+    };
+
+    loadSavedProfile();
+  }, []);
+
+  // Persist profileId + update state
+  const setActiveProfileId = async (id: string | null) => {
+    setActiveProfileIdState(id);
+
+    if (id) {
+      await AsyncStorage.setItem('profileId', id);
+    } else {
+      await AsyncStorage.removeItem('profileId');
+    }
+  };
+
+  // Fetch profile name when ID changes
   useEffect(() => {
     const fetchProfileName = async () => {
       if (!activeProfileId) {
@@ -34,10 +62,10 @@ export const ActiveProfileProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       try {
-        // Assuming backend endpoint returns profile details by ID
-        const res = await fetch(
+        const res = await authFetch(
           `${BASE_URL}/api/users/${activeProfileId}/fetchName`,
         );
+
         const data = await res.json();
 
         if (res.ok && data.name) {
@@ -56,7 +84,11 @@ export const ActiveProfileProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <ActiveProfileContext.Provider
-      value={{ activeProfileId, activeProfileName, setActiveProfileId }}
+      value={{
+        activeProfileId,
+        activeProfileName,
+        setActiveProfileId,
+      }}
     >
       {children}
     </ActiveProfileContext.Provider>
@@ -72,39 +104,3 @@ export const useActiveProfile = () => {
   }
   return context;
 };
-
-//========================================================================
-// import React, { createContext, ReactNode, useContext, useState } from 'react';
-
-// type ActiveProfileContextType = {
-//   activeProfileId: string | null;
-//   setActiveProfileId: (id: string | null) => void;
-// };
-
-// const ActiveProfileContext = createContext<
-//   ActiveProfileContextType | undefined
-// >(undefined);
-
-// export const ActiveProfileProvider: React.FC<{ children: ReactNode }> = ({
-//   children,
-// }) => {
-//   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
-
-//   return (
-//     <ActiveProfileContext.Provider
-//       value={{ activeProfileId, setActiveProfileId }}
-//     >
-//       {children}
-//     </ActiveProfileContext.Provider>
-//   );
-// };
-
-// export const useActiveProfile = () => {
-//   const context = useContext(ActiveProfileContext);
-//   if (!context) {
-//     throw new Error(
-//       'useActiveProfile must be used within an ActiveProfileProvider',
-//     );
-//   }
-//   return context;
-// };

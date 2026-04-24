@@ -24,6 +24,7 @@ export interface IProfile extends Document {
   activityLevel: string;
   medicalConditions?: string;
   plan: IPlan[];
+  weightLog: { date: Date; weight: number }[];
 }
 
 const profileSchema: Schema = new Schema({
@@ -41,6 +42,7 @@ const profileSchema: Schema = new Schema({
     type: [planSchema],
     default: [{ breakfast: [], lunch: [], dinner: [] }], // <-- default empty plan
   },
+  weightLog: [{ date: { type: Date, default: Date.now }, weight: Number }]
 });
 
 export interface IUser extends Document {

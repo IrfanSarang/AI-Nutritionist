@@ -21,13 +21,12 @@ const Scanner: React.FC = () => {
   const navigation = useNavigation<any>();
 
   const devices = useCameraDevices();
-  const device = devices.filter(device => device.position === 'back')[0]; // back camera
+  const device = devices.filter(device => device.position === 'back')[0];
+
   const [barcode, setBarcode] = useState<string | null>(null);
   const [scanningEnabled, setScanningEnabled] = useState<boolean>(true);
-
   const [torchOn, setTorchOn] = useState<boolean>(false);
 
-  // ✅ Correct usage based on your hook implementation
   const { hasPermission, requestPermission } = useCameraPermission();
 
   useEffect(() => {
@@ -38,17 +37,24 @@ const Scanner: React.FC = () => {
     })();
   }, [hasPermission, requestPermission]);
 
-  // Callback invoked when codes are detected
   const onCodesDetected = useCallback(
     (codes: Code[]) => {
       if (!scanningEnabled) return;
 
       if (codes.length > 0) {
         const first = codes[0];
+
         if (first.value) {
           setBarcode(first.value);
           setTorchOn(false);
-          setScanningEnabled(false); // disable further scanning until reset
+          setScanningEnabled(false);
+
+          // ✅ Navigate immediately to ProductDetails
+          navigation.navigate('ProductDetails', {
+            code: first.value,
+          });
+
+          // (Optional) keep alert if you still want feedback
           Alert.alert('Scanned Code', first.value, [
             {
               text: 'OK',
@@ -58,11 +64,11 @@ const Scanner: React.FC = () => {
         }
       }
     },
-    [scanningEnabled],
+    [scanningEnabled, navigation],
   );
 
   const codeScanner = useCodeScanner({
-    codeTypes: ['qr', 'ean-13', 'ean-8', 'code-128'], // supported formats
+    codeTypes: ['qr', 'ean-13', 'ean-8', 'code-128'],
     onCodeScanned: onCodesDetected,
   });
 
@@ -91,31 +97,11 @@ const Scanner: React.FC = () => {
         codeScanner={codeScanner}
         torch={torchOn ? 'on' : 'off'}
       />
+
       <View style={styles.resultBox}>
         <Text style={styles.resultText}>
           {barcode ? `Scanned Code: ${barcode}` : 'Scan a barcode'}
         </Text>
-        {barcode && (
-          <TouchableOpacity
-            style={{
-              marginTop: 12,
-              backgroundColor: '#5aa9f9',
-              paddingVertical: 13,
-              paddingHorizontal: 20,
-              borderRadius: 8,
-            }}
-            onPress={() => {
-              const scannedCode = barcode; // store code for navigation
-              setBarcode(null); // ✅ clear previous scanned code
-              setScanningEnabled(true);
-              navigation.navigate('ProductDetails', { code: scannedCode });
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '500', fontSize: 16 }}>
-              Know More About the Product
-            </Text>
-          </TouchableOpacity>
-        )}
 
         <TouchableOpacity
           onPress={() => setTorchOn(prev => !prev)}

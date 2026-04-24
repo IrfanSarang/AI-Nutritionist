@@ -15,8 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { GOOGLE_API_KEY_2 } from '@env';
 import BASE_URL from '../config/url';
+import { authFetch } from '../utils/api';
 
-// Profile type matches backend fields
 type Profile = {
   _id: string;
   name: string;
@@ -33,7 +33,7 @@ type Profile = {
 type RootStackParamList = {
   GetStarted: undefined;
   ProfileDetails: undefined;
-  // add any other screens here
+  Progress: undefined; // ✅ added
 };
 
 type NavigationProp = NativeStackNavigationProp<
@@ -54,18 +54,17 @@ const ProfileDetails: React.FC = () => {
 
   const navigation = useNavigation<NavigationProp>();
 
-  // Fetch profile data
   useEffect(() => {
     const fetchProfile = async () => {
       if (!activeProfileId) {
         setLoading(false);
         setProfile(null);
-        return; // 👈 Skip fetch if no profile
+        return;
       }
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(
+        const res = await authFetch(
           `${BASE_URL}/api/users/profile/${activeProfileId}`,
         );
         if (!res.ok) throw new Error('Failed to fetch profile');
@@ -87,7 +86,7 @@ const ProfileDetails: React.FC = () => {
       if (!formData) return;
       setLoading(true);
       setError(null);
-      const res = await fetch(
+      const res = await authFetch(
         `${BASE_URL}/api/users/profile/${activeProfileId}`,
         {
           method: 'PUT',
@@ -95,7 +94,9 @@ const ProfileDetails: React.FC = () => {
           body: JSON.stringify(formData),
         },
       );
+
       const data = (await res.json()) as Profile;
+
       if (res.ok) {
         setProfile(data);
         setEditMode(false);
@@ -108,6 +109,32 @@ const ProfileDetails: React.FC = () => {
       Alert.alert('Error', error.message || 'Something went wrong');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDiagnosis = async () => {
+    if (!profile) return;
+
+    setDiagLoading(true);
+    setDiagnosis(null);
+
+    try {
+      const response = await authFetch(`${BASE_URL}/api/users/diagnosis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profile,
+        }),
+      });
+
+      const data = await response.json();
+      setDiagnosis(data.reply);
+    } catch (error) {
+      setDiagnosis('Failed to fetch diagnosis.');
+    } finally {
+      setDiagLoading(false);
     }
   };
 
@@ -131,7 +158,6 @@ const ProfileDetails: React.FC = () => {
     );
   }
 
-  // Helper to render fields
   const renderField = (
     label: string,
     key: keyof Profile,
@@ -154,33 +180,6 @@ const ProfileDetails: React.FC = () => {
     </View>
   );
 
-  const fetchDiagnosis = async () => {
-    if (!profile) return;
-
-    setDiagLoading(true);
-    setDiagnosis(null);
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/users/diagnosis`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          profile,
-        }),
-      });
-
-      const data = await response.json();
-      setDiagnosis(data.reply);
-    } catch (error) {
-      console.error('Backend diagnosis error:', error);
-      setDiagnosis('Failed to fetch diagnosis.');
-    } finally {
-      setDiagLoading(false);
-    }
-  };
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -189,6 +188,7 @@ const ProfileDetails: React.FC = () => {
           style={styles.profileImage}
         />
         <Text style={styles.name}>{profile.name}</Text>
+
         <TouchableOpacity
           style={styles.editIcon}
           onPress={() => setEditMode(!editMode)}
@@ -205,25 +205,21 @@ const ProfileDetails: React.FC = () => {
           <Text style={styles.sectionTitle}>Profile Details</Text>
         </View>
 
-        {/* Row 1 */}
         <View style={styles.row}>
           {renderField('Age', 'age', 'numeric')}
           {renderField('Gender', 'gender')}
         </View>
 
-        {/* Row 2 */}
         <View style={styles.row}>
           {renderField('Height (cm)', 'height', 'numeric')}
           {renderField('Weight (kg)', 'weight', 'numeric')}
         </View>
 
-        {/* Row 3 */}
         <View style={styles.row}>
           {renderField('Diet Type', 'dietType')}
           {renderField('Allergies', 'allergies')}
         </View>
 
-        {/* Row 4 */}
         <View style={styles.row}>
           {renderField('Health Goal', 'healthGoal')}
           {renderField('Activity Level', 'activityLevel')}
@@ -272,6 +268,7 @@ const ProfileDetails: React.FC = () => {
             </Text>
           )}
         </ScrollView>
+
         <TouchableOpacity
           onPress={fetchDiagnosis}
           style={{
@@ -295,6 +292,23 @@ const ProfileDetails: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* ✅ NEW BUTTON */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Progress')}
+        style={{
+          backgroundColor: '#0b385b',
+          padding: 12,
+          borderRadius: 12,
+          marginHorizontal: 40,
+          marginBottom: 20,
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>
+          View Progress
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -302,6 +316,7 @@ const ProfileDetails: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+
   header: {
     padding: 15,
     flexDirection: 'row',
@@ -309,12 +324,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0f0ff',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
     elevation: 6,
   },
+
   profileImage: {
     width: 60,
     height: 60,
@@ -324,35 +336,24 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#4ea4e5',
   },
+
   name: {
     fontSize: 26,
     fontWeight: '600',
     flex: 1,
     color: '#0a0634',
   },
+
   editIcon: {
     position: 'absolute',
     top: 20,
     right: 20,
   },
+
   editButton: {
     width: 30,
     height: 30,
     tintColor: '#0a0634',
-  },
-  logoutIcon: {
-    position: 'absolute',
-    top: 18,
-    right: 70,
-    backgroundColor: '#df3e3eff',
-    paddingHorizontal: 17,
-    paddingVertical: 8,
-    borderRadius: 15,
-  },
-  logoutText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '500',
   },
 
   section: {
@@ -364,36 +365,40 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#d0def3',
   },
+
   sectionHeader: {
     backgroundColor: '#cde1f7',
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
+    borderRadius: 15,
     paddingVertical: 6,
     alignItems: 'center',
     marginBottom: 12,
   },
+
   sectionTitle: {
     fontWeight: '700',
     fontSize: 20,
     color: '#426dae',
   },
+
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
   },
+
   detailItem: { width: '48%' },
+
   label: {
     fontSize: 15,
     color: '#6c7a89',
     marginBottom: 4,
   },
+
   value: {
     fontSize: 16,
     color: '#222',
     fontWeight: '500',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    padding: 6,
     backgroundColor: '#fff',
     borderRadius: 8,
     borderWidth: 1,
@@ -410,12 +415,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     padding: 15,
     marginVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
   },
+
   diagnoseText: {
     alignSelf: 'center',
     fontSize: 18,

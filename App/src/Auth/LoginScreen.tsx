@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -17,6 +18,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useUser } from '../context/UserIdContext';
 import { useActiveProfile } from '../context/ActiveProfileContext';
 import BASE_URL from '../config/url';
+import { saveSession } from '../utils/storage';
 
 type RootStackParamList = {
   Signup: undefined;
@@ -26,6 +28,7 @@ type RootStackParamList = {
 
 type LoginResponse = {
   message: string;
+  token: string;
   user: {
     _id: string;
     fullName: string;
@@ -38,17 +41,19 @@ export default function LoginScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [emailError, setEmailError] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-  const { setUserId } = useUser();
+  const [loading, setLoading] = useState(false);
+
+  const { setUserId, setAuthToken } = useUser();
   const { setActiveProfileId } = useActiveProfile();
 
-  // ---------- Real-time validation ----------
+  // ---------- validation ----------
   const validateEmail = (text: string) => {
     const pattern = /^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
     if (!text.trim()) return 'Email is required.';
@@ -62,32 +67,48 @@ export default function LoginScreen() {
     return '';
   };
 
-  // ---------- Handler ----------
+  // ---------- login ----------
   const handleLogin = async () => {
     const emailErr = validateEmail(email);
     const passErr = validatePassword(password);
+
     setEmailError(emailErr);
     setPasswordError(passErr);
 
     if (emailErr || passErr) return;
 
+    setLoading(true);
+
     try {
       const response = await fetch(`${BASE_URL}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
       });
 
       const data = (await response.json()) as LoginResponse;
 
       if (response.ok) {
         setUserId(data.user._id);
-        if (data.user.profile && data.user.profile.length > 0) {
+        setAuthToken(data.token);
+
+        if (data.user.profile?.length > 0) {
           setActiveProfileId(data.user.profile[0]._id);
         }
+
+        await saveSession(
+          data.user._id,
+          data.user.profile?.[0]?._id || '',
+          data.token,
+        );
+
         navigation.navigate('MainApp');
       } else {
         const msg = data.message.toLowerCase();
+
         if (msg.includes('email')) {
           setEmailError(data.message);
           setPasswordError('');
@@ -100,8 +121,10 @@ export default function LoginScreen() {
         }
       }
     } catch (error) {
-      setPasswordError('Something went wrong. Please try again.');
       console.error('Login error:', error);
+      setPasswordError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,7 +141,7 @@ export default function LoginScreen() {
             value={email}
             onChangeText={text => {
               setEmail(text);
-              setEmailError(validateEmail(text)); // real-time
+              setEmailError(validateEmail(text));
             }}
           />
           {emailError ? (
@@ -134,27 +157,36 @@ export default function LoginScreen() {
               value={password}
               onChangeText={text => {
                 setPassword(text);
-                setPasswordError(validatePassword(text)); // real-time
+                setPasswordError(validatePassword(text));
               }}
             />
+
             <TouchableOpacity
               onPressIn={() => setShowPassword(true)}
               onPressOut={() => setShowPassword(false)}
               style={{ position: 'absolute', right: 15, top: 20 }}
             >
-              <Text style={{ color: '#1e90ff', fontWeight: '500' }}>Show</Text>
+              <Text style={{ color: '#1e90ff', fontWeight: '500' }}>
+                Show
+              </Text>
             </TouchableOpacity>
           </View>
+
           {passwordError ? (
             <Text style={styles.errorText}>{passwordError}</Text>
           ) : null}
 
+          {/* Login Button */}
           <TouchableOpacity
+            style={[styles.button, loading && { opacity: 0.6 }]}
+            disabled={loading}
             onPress={handleLogin}
-            style={[styles.button, (!email || !password) && { opacity: 0.6 }]}
-            disabled={!email || !password}
           >
-            <Text style={styles.buttonText}>Log In</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Login</Text>
+            )}
           </TouchableOpacity>
 
           <Text style={styles.signupText}>

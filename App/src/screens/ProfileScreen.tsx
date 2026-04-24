@@ -16,6 +16,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useActiveProfile } from '../context/ActiveProfileContext';
 import { useUser } from '../context/UserIdContext';
 import BASE_URL from '../config/url';
+import { authFetch } from '../utils/api';
+import { clearSession } from '../utils/storage';
 
 type RootStackParamList = {
   Profiles: undefined;
@@ -44,23 +46,30 @@ export default function ProfilesScreen() {
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
-  const normalize = (raw: any[]): Profile[] =>
-    (raw ?? []).flatMap(user =>
-      (user.profile ?? [])
-        .filter((p: any) => p && (p._id || p.id) && typeof p.name === 'string')
-        .map((p: any, idx: number) => ({
-          id: String(p._id ?? p.id ?? `${user._id}-${idx}`),
-          name: String(p.name),
-        })),
-    );
-
+  // FETCH ONLY LOGGED-IN USER PROFILES (SECURE)
   const fetchProfiles = useCallback(async () => {
     try {
       setError(null);
-      const res = await fetch(`${BASE_URL}/api/users/fetchData`);
+
+      if (!userId) {
+        setError('User not logged in');
+        setLoading(false);
+        return;
+      }
+
+      const res = await authFetch(
+        `${BASE_URL}/api/users/${userId}/profiles`,
+      );
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = (await res.json()) as unknown;
-      const data = Array.isArray(json) ? normalize(json) : [];
+
+      const json = await res.json();
+
+      const data: Profile[] = (json || []).map((p: any) => ({
+        id: String(p._id),
+        name: String(p.name),
+      }));
+
       setProfiles(data);
 
       if (data.length > 0 && !activeProfileId) {
@@ -73,29 +82,40 @@ export default function ProfilesScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [activeProfileId, setActiveProfileId]);
+  }, [userId, activeProfileId, setActiveProfileId]);
 
   const handleDeleteProfile = async (profileId: string) => {
     try {
       setLoading(true);
       setError(null);
+
       if (!userId) {
         setError('User ID not found');
         setLoading(false);
         return;
       }
-      const res = await fetch(
+
+      const res = await authFetch(
         `${BASE_URL}/api/users/${userId}/profiles/${profileId}`,
-        {
-          method: 'DELETE',
-        },
+        { method: 'DELETE' },
       );
+
       if (!res.ok) throw new Error('Failed to delete profile');
+
       await fetchProfiles();
     } catch (e: any) {
       setError(e?.message ?? 'Failed to delete profile');
       setLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await clearSession();
+    setActiveProfileId(null);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
   };
 
   useEffect(() => {
@@ -113,14 +133,6 @@ export default function ProfilesScreen() {
     fetchProfiles();
   }, [fetchProfiles]);
 
-  const handleLogout = () => {
-    setActiveProfileId(null); // Clear active profile
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Login' }], // Replace with your login screen
-    });
-  };
-
   const renderProfileItem = ({ item }: { item: Profile }) => (
     <View style={styles.profileCard}>
       <View style={styles.profileInfo}>
@@ -130,6 +142,7 @@ export default function ProfilesScreen() {
         />
         <View style={{ marginLeft: 10 }}>
           <Text style={styles.name}>{item.name}</Text>
+
           <TouchableOpacity
             style={{
               backgroundColor:
@@ -152,10 +165,13 @@ export default function ProfilesScreen() {
       <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity
           style={styles.editButton}
-          onPress={() => navigation.navigate('ProfileDetails', { id: item.id })}
+          onPress={() =>
+            navigation.navigate('ProfileDetails', { id: item.id })
+          }
         >
-          <Text style={styles.editText}>Show</Text>
+          <Text style={styles.editText}>View & Edit</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[
             styles.editButton,
@@ -184,17 +200,7 @@ export default function ProfilesScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header always visible */}
-      <View
-        style={[
-          styles.header,
-          {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          },
-        ]}
-      >
+      <View style={styles.header}>
         <Text style={styles.headerText}>Profiles</Text>
 
         <View style={{ position: 'relative' }}>
@@ -234,7 +240,6 @@ export default function ProfilesScreen() {
         </View>
       </View>
 
-      {/* Conditional Content */}
       {loading && (
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#4287f5" />
@@ -269,7 +274,6 @@ export default function ProfilesScreen() {
         />
       )}
 
-      {/* Add New User Button always visible */}
       <TouchableOpacity
         style={styles.addUserButton}
         onPress={() => navigation.navigate('ProfileForm')}
@@ -349,6 +353,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   retryText: { color: 'white', fontWeight: '600' },
+
   dropdownMenu: {
     position: 'absolute',
     top: 40,

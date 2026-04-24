@@ -33,8 +33,14 @@ import {
   resetPassword,
 } from "../controllers/forgetPassController";
 
+import { generateRecipe } from "../controllers/recipeController";
+
 import { protect } from "../middleware/auth";
 import { aiLimiter, authLimiter } from "../middleware/rateLimiter";
+
+import { fetchMeal, addMealItem, deleteMealItem, fetchProfile, addWeightLog } from '../controllers/planController';
+
+// Add route:
 
 const router = express.Router();
 
@@ -72,5 +78,8 @@ router.post("/change-password", protect, changePassword);
 router.post("/chat", protect, aiLimiter, chatWithAI);
 router.post("/product", protect, aiLimiter, getProductAIInsight);
 router.post("/diagnosis", protect, aiLimiter, getProfileAIDiagnosis);
+router.post("/recipe", protect, aiLimiter, generateRecipe);
+
+router.post('/:userId/:profileId/weightLog', protect, addWeightLog);
 
 export default router;

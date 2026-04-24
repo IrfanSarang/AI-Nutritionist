@@ -10,7 +10,7 @@ type ScanScreenNavigationProp = NativeStackNavigationProp<
   'Scanner'
 >;
 
-export default function ScanScren() {
+export default function ScanScreen() {
   const navigation = useNavigation<ScanScreenNavigationProp>();
 
   return (

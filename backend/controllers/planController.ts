@@ -123,3 +123,19 @@ export const fetchProfile = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const addWeightLog = async (req: Request, res: Response) => {
+  const { userId, profileId } = req.params;
+  const { weight } = req.body;
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const profile = user.profile.find(p => p._id.toString() === profileId);
+    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+    profile.weightLog.push({ date: new Date(), weight });
+    await user.save();
+    return res.status(201).json({ message: 'Weight logged', weightLog: profile.weightLog });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
