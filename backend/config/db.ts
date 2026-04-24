@@ -8,9 +8,10 @@ const connectDB = async () => {
     return;
   }
 
-  if (!process.env.MONGODB_URI) throw new Error("MongoDB url is not defined");
+  if (!process.env.MONGO_URL) throw new Error("MongoDB url is not defined");
 
-  await mongoose.connect(process.env.MONGODB_URI, {
+  await mongoose.connect(process.env.MONGO_URL
+    , {
     maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
