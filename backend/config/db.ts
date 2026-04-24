@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import mongoose from "mongoose";
 
 let isConnected = false;
@@ -19,20 +18,6 @@ const connectDB = async () => {
 
   isConnected = true;
   console.log("MongoDB connected successfully");
-=======
-import mongoose from 'mongoose';
-
-const connectDB = async () => {
-  try {
-    if (!process.env.MONGO_URL) throw new Error('MONGO_URL not defined');
-
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.error('MongoDB connection failed: ', err);
-    process.exit(1);
-  }
->>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637
 };
 
 export default connectDB;

@@ -2,10 +2,7 @@ node_modules/
 .env
 dist/
 *.log
-<<<<<<< HEAD
 
 dist/
 node_modules/
 .env
-=======
->>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637

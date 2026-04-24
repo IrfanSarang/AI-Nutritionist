@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 
-<<<<<<< HEAD
 type GeminiResponse = {
   candidates?: {
     content?: {
@@ -18,12 +17,6 @@ export const chatWithAI = async (req: Request, res: Response) => {
   const sanitizedMessage = message.replace(/<[^>]*>/g, "").substring(0, 1000);
 
   if (!sanitizedMessage) {
-=======
-export const chatWithAI = async (req: Request, res: Response) => {
-  const { message, conversationHistory } = req.body;
-
-  if (!message) {
->>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637
     return res.status(400).json({ reply: "Message is required" });
   }
 
@@ -45,11 +38,7 @@ export const chatWithAI = async (req: Request, res: Response) => {
                       description:
                         "Hi! I am Nova, your AI Nutritionist. I first understand the user problem, explain it simply, ask clarifying questions, and only give meal plans when requested. Meals use Indian foods, balanced macros, and healthy cooking. Responses are under 100 words.",
                     },
-<<<<<<< HEAD
                     userMessage: sanitizedMessage, // ✅ using sanitized message
-=======
-                    userMessage: message,
->>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637
                     conversationHistory,
                   }),
                 },
@@ -57,7 +46,6 @@ export const chatWithAI = async (req: Request, res: Response) => {
             },
           ],
         }),
-<<<<<<< HEAD
       },
     );
 
@@ -70,27 +58,14 @@ export const chatWithAI = async (req: Request, res: Response) => {
     }
 
     const data: GeminiResponse = await response.json();
-=======
-      }
-    );
-
-    const data = await response.json();
->>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637
 
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Sorry, I could not understand.";
 
-<<<<<<< HEAD
     return res.json({ reply });
   } catch (error) {
     console.error("Gemini API Error:", error);
     return res.status(500).json({ reply: "Internal server error" });
-=======
-    res.json({ reply });
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).json({ reply: "Internal server error" });
->>>>>>> f1f10efe7f9655be7e016c5d01858dc787bbe637
   }
 };
