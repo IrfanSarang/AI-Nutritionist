@@ -4,6 +4,19 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 /* =========================
+   GEMINI RESPONSE TYPE
+========================= */
+type GeminiResponse = {
+  candidates?: {
+    content?: {
+      parts?: {
+        text?: string;
+      }[];
+    };
+  }[];
+};
+
+/* =========================
    PASSWORD VALIDATION
 ========================= */
 const isStrongPassword = (password: string): boolean => {
@@ -50,7 +63,7 @@ export const registerUser = async (req: Request, res: Response) => {
       message: "User registered successfully",
     });
   } catch (err) {
-    console.error("REGISTER_ERROR:", err); // server-only log
+    console.error("REGISTER_ERROR:", err);
 
     return res.status(500).json({
       message: "Something went wrong",
@@ -240,6 +253,74 @@ export const changePassword = async (req: any, res: Response) => {
 
     return res.status(500).json({
       message: "Something went wrong",
+    });
+  }
+};
+
+/* =========================
+   IDENTIFY FOOD (FIXED)
+========================= */
+export const identifyFood = async (req: Request, res: Response) => {
+  const { imageBase64 } = req.body;
+
+  if (!imageBase64) {
+    return res.status(400).json({ message: "No image provided" });
+  }
+
+  try {
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `You are a nutrition expert. Look at this food image and respond ONLY with a valid JSON object — no explanation, no markdown, no extra text.`,
+                },
+                {
+                  inline_data: {
+                    mime_type: "image/jpeg",
+                    data: imageBase64,
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+      },
+    );
+
+    const geminiData = (await geminiRes.json()) as GeminiResponse;
+
+    const rawText =
+      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    if (!rawText) {
+      return res.status(500).json({ message: "Invalid AI response" });
+    }
+
+    const cleaned = rawText.replace(/```json|```/gi, "").trim();
+
+    let parsed;
+
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      return res.status(500).json({
+        message: "Failed to parse AI response",
+        raw: cleaned,
+      });
+    }
+
+    return res.status(200).json(parsed);
+  } catch (err) {
+    console.error("IDENTIFY_FOOD_ERROR:", err);
+
+    return res.status(500).json({
+      message: "Food analysis failed",
     });
   }
 };

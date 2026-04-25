@@ -13,8 +13,8 @@ import {
 import { useActiveProfile } from '../context/ActiveProfileContext';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { GOOGLE_API_KEY_2 } from '@env';
-import BASE_URL from '../config/url';
+
+import { BASE_URL } from '../../config';
 import { authFetch } from '../utils/api';
 
 type Profile = {

@@ -1,65 +1,24 @@
-import dotenv from "dotenv";
-dotenv.config();
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-import express from "express";
-import cors from "cors";
-
-import userRoutes from "../routes/userRoutes";
-import connectDB from "../config/db";
-import { generalLimiter } from "../middleware/rateLimiter";
-
-/* =========================
-   🔐 ENV VALIDATION (CRITICAL FIX)
-========================= */
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET not set in environment variables");
+interface AuthRequest extends Request {
+  user?: any;
 }
 
-if (!process.env.MONGO_URL) {
-  throw new Error("MONGO_URL not set in environment variables");
-}
+export const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
 
-/* =========================
-   APP SETUP
-========================= */
-const app = express();
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
-/* =========================
-   DB CONNECTION
-========================= */
-connectDB();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
 
-/* =========================
-   CORS
-========================= */
-app.use(
-  cors({
-    origin: process.env.ALLOWED_ORIGIN || "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+    req.user = decoded;
 
-/* =========================
-   MIDDLEWARE
-========================= */
-app.use(express.json({ limit: "10mb" }));
-app.use(generalLimiter);
-
-/* =========================
-   ROUTES
-========================= */
-app.use("/api/users", userRoutes);
-
-/* =========================
-   ERROR HANDLER
-========================= */
-app.use((err: any, req: any, res: any, next: any) => {
-  console.error("Unhandled error:", err);
-
-  res.status(500).json({
-    message: "Internal server error",
-  });
-});
-
-export default app;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+};

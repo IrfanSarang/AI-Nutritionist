@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useUser } from '../context/UserIdContext';
 import { useActiveProfile } from '../context/ActiveProfileContext';
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 import { authFetch } from '../utils/api';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner';
@@ -40,8 +40,7 @@ const MealPlanner = () => {
 
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentMealType, setCurrentMealType] =
-    useState<MealType>('breakfast');
+  const [currentMealType, setCurrentMealType] = useState<MealType>('breakfast');
   const [mealInput, setMealInput] = useState('');
 
   const { userId } = useUser();

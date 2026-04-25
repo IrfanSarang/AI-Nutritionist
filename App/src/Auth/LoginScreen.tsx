@@ -17,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useUser } from '../context/UserIdContext';
 import { useActiveProfile } from '../context/ActiveProfileContext';
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 import { saveSession } from '../utils/storage';
 
 type RootStackParamList = {
@@ -166,9 +166,7 @@ export default function LoginScreen() {
               onPressOut={() => setShowPassword(false)}
               style={{ position: 'absolute', right: 15, top: 20 }}
             >
-              <Text style={{ color: '#1e90ff', fontWeight: '500' }}>
-                Show
-              </Text>
+              <Text style={{ color: '#1e90ff', fontWeight: '500' }}>Show</Text>
             </TouchableOpacity>
           </View>
 

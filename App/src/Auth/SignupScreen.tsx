@@ -14,7 +14,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 
 type RootStackParamList = {
   Login: undefined;
@@ -41,16 +41,14 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    const validateName = (name: string) =>
-      /^[a-zA-Z ]{2,30}$/.test(name);
+    const validateName = (name: string) => /^[a-zA-Z ]{2,30}$/.test(name);
 
     const validateEmail = (email: string) => {
       const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
       return emailPattern.test(email);
     };
 
-    const validatePassword = (password: string) =>
-      password.length >= 8;
+    const validatePassword = (password: string) => password.length >= 8;
 
     try {
       setFullNameError('');
@@ -63,9 +61,7 @@ export default function SignupScreen() {
         setFullNameError('Full name is required.');
         hasError = true;
       } else if (!validateName(fullName.trim())) {
-        setFullNameError(
-          'Name should be 2-30 letters and spaces only.',
-        );
+        setFullNameError('Name should be 2-30 letters and spaces only.');
         hasError = true;
       }
 
@@ -81,9 +77,7 @@ export default function SignupScreen() {
         setPasswordError('Password is required.');
         hasError = true;
       } else if (!validatePassword(password)) {
-        setPasswordError(
-          'Password must be at least 8 characters long.',
-        );
+        setPasswordError('Password must be at least 8 characters long.');
         hasError = true;
       }
 
@@ -91,37 +85,27 @@ export default function SignupScreen() {
 
       setLoading(true);
 
-      const response = await fetch(
-        `${BASE_URL}/api/users/register`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fullName,
-            email: email.trim().toLowerCase(),
-            password,
-          }),
-        },
-      );
+      const response = await fetch(`${BASE_URL}/api/users/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName,
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      });
 
       const data = (await response.json()) as SignupResponse;
 
       if (response.ok) {
-        Alert.alert(
-          'Success',
-          data.message || 'User registered successfully',
-          [
-            {
-              text: 'Now Log In with your new account',
-              onPress: () => navigation.navigate('Login'),
-            },
-          ],
-        );
+        Alert.alert('Success', data.message || 'User registered successfully', [
+          {
+            text: 'Now Log In with your new account',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ]);
       } else {
-        Alert.alert(
-          'Signup Failed',
-          data.message || 'Something went wrong',
-        );
+        Alert.alert('Signup Failed', data.message || 'Something went wrong');
       }
     } catch (error) {
       console.error('Signup error:', error);
@@ -186,9 +170,7 @@ export default function SignupScreen() {
               onPressOut={() => setShowPassword(false)}
               style={{ position: 'absolute', right: 15, top: 20 }}
             >
-              <Text style={{ color: '#1e90ff', fontWeight: '500' }}>
-                Show
-              </Text>
+              <Text style={{ color: '#1e90ff', fontWeight: '500' }}>Show</Text>
             </TouchableOpacity>
           </View>
 
@@ -216,12 +198,8 @@ export default function SignupScreen() {
 
           {/* Login Row */}
           <View style={styles.loginRow}>
-            <Text style={styles.signupText}>
-              Already have an account?{' '}
-            </Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Login')}
-            >
+            <Text style={styles.signupText}>Already have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text style={styles.loginText}>Log In</Text>
             </TouchableOpacity>
           </View>

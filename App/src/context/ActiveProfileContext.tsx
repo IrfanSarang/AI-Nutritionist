@@ -8,7 +8,7 @@ import React, {
   useEffect,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 import { authFetch } from '../utils/api';
 
 type ActiveProfileContextType = {
@@ -24,13 +24,13 @@ const ActiveProfileContext = createContext<
 export const ActiveProfileProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [activeProfileId, setActiveProfileIdState] = useState<
-    string | null
-  >(null);
+  const [activeProfileId, setActiveProfileIdState] = useState<string | null>(
+    null,
+  );
 
-  const [activeProfileName, setActiveProfileName] = useState<
-    string | null
-  >(null);
+  const [activeProfileName, setActiveProfileName] = useState<string | null>(
+    null,
+  );
 
   // Load saved profile on mount
   useEffect(() => {

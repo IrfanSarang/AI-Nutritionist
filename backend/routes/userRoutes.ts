@@ -7,6 +7,7 @@ import {
   getProfiles,
   deleteProfile,
   changePassword,
+  identifyFood, // ✅ added here (merge properly)
 } from "../controllers/userController";
 
 import {
@@ -29,7 +30,7 @@ import {
 
 import { generateRecipe } from "../controllers/recipeController";
 
-import protect from "../middleware/auth";
+import { auth as protect } from "../middleware/auth";
 import { aiLimiter, authLimiter } from "../middleware/rateLimiter";
 
 import {
@@ -61,12 +62,12 @@ router.get("/profile/:id", protect, getProfileById);
 router.put("/profile/:id", protect, updateProfileById);
 
 /* =====================================================
-   IMPORTANT: STATIC ROUTES FIRST (AVOID PARAM CONFLICTS)
+   STATIC ROUTES FIRST
 ===================================================== */
 router.get("/:profileId/fetchName", protect, fetchProfileName);
 
 /* =====================================================
-   MEAL ROUTES (PROTECTED)
+   MEAL ROUTES
 ===================================================== */
 router.get("/:userId/:profileId/fetchMeal", protect, fetchMeal);
 
@@ -84,12 +85,15 @@ router.delete(
 router.post("/change-password", protect, changePassword);
 
 /* =====================================================
-   AI ROUTES (RATE LIMITED + PROTECTED)
+   AI ROUTES (UPDATED)
 ===================================================== */
 router.post("/chat", protect, aiLimiter, chatWithAI);
 router.post("/product", protect, aiLimiter, getProductAIInsight);
 router.post("/diagnosis", protect, aiLimiter, getProfileAIDiagnosis);
 router.post("/recipe", protect, aiLimiter, generateRecipe);
+
+// ✅ NEW ROUTE (correct placement)
+router.post("/identify-food", protect, aiLimiter, identifyFood);
 
 /* =====================================================
    WEIGHT LOG
