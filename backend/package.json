@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only api/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only server.ts",
     "vercel-build": "tsc --noEmit",
     "test": "echo \"no test\" && exit 1"
   },

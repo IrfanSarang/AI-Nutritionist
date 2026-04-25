@@ -48,7 +48,11 @@ export default function SignupScreen() {
       return emailPattern.test(email);
     };
 
-    const validatePassword = (password: string) => password.length >= 8;
+    const validatePassword = (password: string) =>
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
     try {
       setFullNameError('');
@@ -77,7 +81,9 @@ export default function SignupScreen() {
         setPasswordError('Password is required.');
         hasError = true;
       } else if (!validatePassword(password)) {
-        setPasswordError('Password must be at least 8 characters long.');
+        setPasswordError(
+          'Password must be 8+ chars and include an uppercase letter, a number, and a special character (e.g. Test@1234).',
+        );
         hasError = true;
       }
 
