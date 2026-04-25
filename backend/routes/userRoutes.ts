@@ -29,14 +29,13 @@ import {
 
 import { generateRecipe } from "../controllers/recipeController";
 
-import { protect } from "../middleware/auth";
+import protect from "../middleware/auth";
 import { aiLimiter, authLimiter } from "../middleware/rateLimiter";
 
 import {
   fetchMeal,
   addMealItem,
   deleteMealItem,
-  fetchProfile,
   addWeightLog,
 } from "../controllers/planController";
 
@@ -64,7 +63,6 @@ router.put("/profile/:id", protect, updateProfileById);
 /* =====================================================
    IMPORTANT: STATIC ROUTES FIRST (AVOID PARAM CONFLICTS)
 ===================================================== */
-router.get("/:userId/firstProfile", protect, fetchProfile);
 router.get("/:profileId/fetchName", protect, fetchProfileName);
 
 /* =====================================================

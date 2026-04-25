@@ -21,7 +21,8 @@ const validateIds = (userId: string, profileId?: string) => {
    FETCH MEAL
 ========================= */
 export const fetchMeal = async (req: Request, res: Response) => {
-  const { userId, profileId } = req.params;
+  const userId = req.params.userId as string;
+  const profileId = req.params.profileId as string;
 
   const error = validateIds(userId, profileId);
   if (error) return res.status(400).json({ message: error });
@@ -49,7 +50,8 @@ export const fetchMeal = async (req: Request, res: Response) => {
    ADD MEAL
 ========================= */
 export const addMealItem = async (req: Request, res: Response) => {
-  const { userId, profileId } = req.params;
+  const userId = req.params.userId as string;
+  const profileId = req.params.profileId as string;
   const { mealType, item } = req.body;
 
   const error = validateIds(userId, profileId);
@@ -88,7 +90,8 @@ export const addMealItem = async (req: Request, res: Response) => {
    DELETE MEAL
 ========================= */
 export const deleteMealItem = async (req: Request, res: Response) => {
-  const { userId, profileId } = req.params;
+  const userId = req.params.userId as string;
+  const profileId = req.params.profileId as string;
   const { mealType, item } = req.body;
 
   const error = validateIds(userId, profileId);
@@ -132,7 +135,8 @@ export const deleteMealItem = async (req: Request, res: Response) => {
    ADD WEIGHT LOG
 ========================= */
 export const addWeightLog = async (req: Request, res: Response) => {
-  const { userId, profileId } = req.params;
+  const userId = req.params.userId as string;
+  const profileId = req.params.profileId as string;
   const { weight } = req.body;
 
   const error = validateIds(userId, profileId);
