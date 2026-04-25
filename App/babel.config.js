@@ -12,6 +12,8 @@ module.exports = {
         allowUndefined: true,
       },
     ],
-    'react-native-reanimated/plugin',
+
+    // MUST be last
+    'react-native-worklets/plugin',
   ],
 };

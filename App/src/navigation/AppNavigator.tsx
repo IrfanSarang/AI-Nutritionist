@@ -18,7 +18,7 @@ import ProfileForm from '../screens/ProfileForm';
 import Scanner from '../screens/Scanner';
 import RecipeScreen from '../screens/RecipeScreen';
 
-import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import ForgotPasswordScreen from '../screens/ForgetPasswordScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 
 import OnboardingScreen from '../screens/OnboardingScreen';

@@ -38,8 +38,7 @@ const App = () => {
   checkSession();
 }, []);
 
-    checkSession();
-  }, []);
+
 
   if (!initialRoute) {
     return (
