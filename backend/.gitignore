@@ -6,3 +6,6 @@ dist/
 dist/
 node_modules/
 .env
+
+android/app/debug.keystore
+android/app/release.keystore

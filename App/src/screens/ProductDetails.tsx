@@ -11,17 +11,14 @@ import {
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 import { authFetch } from '../utils/api';
 
 type RootStackParamList = {
   ProductDetails: { code: string };
 };
 
-type ProductDetailsRouteProp = RouteProp<
-  RootStackParamList,
-  'ProductDetails'
->;
+type ProductDetailsRouteProp = RouteProp<RootStackParamList, 'ProductDetails'>;
 
 interface ProductData {
   product_name?: string;
@@ -153,26 +150,20 @@ const ProductDetails: React.FC = () => {
             <Text style={styles.detail}>Brand: {product.brands}</Text>
           )}
           {product.categories && (
-            <Text style={styles.detail}>
-              Categories: {product.categories}
-            </Text>
+            <Text style={styles.detail}>Categories: {product.categories}</Text>
           )}
         </View>
 
         {product.ingredients_text && (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
-            <Text style={styles.sectionText}>
-              {product.ingredients_text}
-            </Text>
+            <Text style={styles.sectionText}>{product.ingredients_text}</Text>
           </View>
         )}
 
         {product.nutriments && (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>
-              Nutritional Information
-            </Text>
+            <Text style={styles.sectionTitle}>Nutritional Information</Text>
 
             {[
               {
@@ -213,24 +204,18 @@ const ProductDetails: React.FC = () => {
             <Text style={styles.sectionText}>{aiInsight}</Text>
           )}
 
-          <TouchableOpacity
-            style={styles.aiButton}
-            onPress={fetchAIInsights}
-          >
-            <Text style={styles.aiButtonText}>
-              Generate AI Insights
-            </Text>
+          <TouchableOpacity style={styles.aiButton} onPress={fetchAIInsights}>
+            <Text style={styles.aiButtonText}>Generate AI Insights</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.card, styles.tipsCard]}>
           <Text style={styles.sectionTitle}>Nutritionist Tips</Text>
           <Text style={styles.sectionText}>
-            • Check sugar and salt intake if you have diabetes or
-            hypertension.{'\n\n'}• High fat products should be consumed in
-            moderation.{'\n\n'}• Prefer products with more protein and
-            natural ingredients.{'\n\n'}• Read ingredients carefully for
-            allergens.
+            • Check sugar and salt intake if you have diabetes or hypertension.
+            {'\n\n'}• High fat products should be consumed in moderation.
+            {'\n\n'}• Prefer products with more protein and natural ingredients.
+            {'\n\n'}• Read ingredients carefully for allergens.
           </Text>
         </View>
       </ScrollView>

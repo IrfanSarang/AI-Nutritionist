@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../context/UserIdContext';
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 import LinearGradient from 'react-native-linear-gradient';
 import { authFetch } from '../utils/api';
 

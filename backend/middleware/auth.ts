@@ -1,28 +1,65 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
-export interface AuthRequest extends Request {
-  userId?: string;
+import express from "express";
+import cors from "cors";
+
+import userRoutes from "../routes/userRoutes";
+import connectDB from "../config/db";
+import { generalLimiter } from "../middleware/rateLimiter";
+
+/* =========================
+   🔐 ENV VALIDATION (CRITICAL FIX)
+========================= */
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET not set in environment variables");
 }
 
-export const protect = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction,
-) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No Token provided" });
-  }
+if (!process.env.MONGO_URL) {
+  throw new Error("MONGO_URL not set in environment variables");
+}
 
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-    req.userId = decoded.id;
-    next();
-  } catch {
-    return res.status(401).json({ message: "Invalid or expired token" });
-  }
-};
+/* =========================
+   APP SETUP
+========================= */
+const app = express();
+
+/* =========================
+   DB CONNECTION
+========================= */
+connectDB();
+
+/* =========================
+   CORS
+========================= */
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGIN || "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+/* =========================
+   MIDDLEWARE
+========================= */
+app.use(express.json({ limit: "10mb" }));
+app.use(generalLimiter);
+
+/* =========================
+   ROUTES
+========================= */
+app.use("/api/users", userRoutes);
+
+/* =========================
+   ERROR HANDLER
+========================= */
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error("Unhandled error:", err);
+
+  res.status(500).json({
+    message: "Internal server error",
+  });
+});
+
+export default app;

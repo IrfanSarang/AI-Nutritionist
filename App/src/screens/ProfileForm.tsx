@@ -9,8 +9,9 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 import { useUser } from '../context/UserIdContext';
 import { authFetch } from '../utils/api';
 
@@ -18,19 +19,46 @@ export default function ProfileForm() {
   const navigation = useNavigation<any>();
   const { userId } = useUser();
 
-  // form states
+  const [submitting, setSubmitting] = useState(false);
+
+  // Basic info
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
 
-  // NEW loading state
-  const [submitting, setSubmitting] = useState(false);
+  // Required backend fields
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [dietType, setDietType] = useState('');
+  const [healthGoal, setHealthGoal] = useState('');
+  const [activityLevel, setActivityLevel] = useState('');
+  const [allergies, setAllergies] = useState('');
+  const [medicalConditions, setMedicalConditions] = useState('');
+
+  const validate = () => {
+    if (
+      !name ||
+      !age ||
+      !gender ||
+      !weight ||
+      !height ||
+      !dietType ||
+      !healthGoal ||
+      !activityLevel
+    ) {
+      Alert.alert('Error', 'Please fill all required fields');
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async () => {
     if (!userId) {
       Alert.alert('Error', 'User not found');
       return;
     }
+
+    if (!validate()) return;
 
     setSubmitting(true);
 
@@ -44,8 +72,18 @@ export default function ProfileForm() {
           userId,
           profile: {
             name,
-            age,
+            age: Number(age),
             gender,
+
+            weight: Number(weight),
+            height: Number(height),
+
+            dietType,
+            healthGoal,
+            activityLevel,
+
+            allergies,
+            medicalConditions,
           },
         }),
       });
@@ -73,13 +111,13 @@ export default function ProfileForm() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Create Profile</Text>
 
+      {/* BASIC INFO */}
       <TextInput
         placeholder="Name"
         value={name}
         onChangeText={setName}
         style={styles.input}
       />
-
       <TextInput
         placeholder="Age"
         value={age}
@@ -87,11 +125,60 @@ export default function ProfileForm() {
         keyboardType="numeric"
         style={styles.input}
       />
-
       <TextInput
         placeholder="Gender"
         value={gender}
         onChangeText={setGender}
+        style={styles.input}
+      />
+
+      {/* BODY INFO */}
+      <TextInput
+        placeholder="Weight (kg)"
+        value={weight}
+        onChangeText={setWeight}
+        keyboardType="numeric"
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Height (cm)"
+        value={height}
+        onChangeText={setHeight}
+        keyboardType="numeric"
+        style={styles.input}
+      />
+
+      {/* GOALS */}
+      <TextInput
+        placeholder="Diet Type (veg/non-veg/vegan)"
+        value={dietType}
+        onChangeText={setDietType}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Health Goal (lose/gain/maintain)"
+        value={healthGoal}
+        onChangeText={setHealthGoal}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Activity Level (low/medium/high)"
+        value={activityLevel}
+        onChangeText={setActivityLevel}
+        style={styles.input}
+      />
+
+      {/* OPTIONAL */}
+      <TextInput
+        placeholder="Allergies (optional)"
+        value={allergies}
+        onChangeText={setAllergies}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Medical Conditions (optional)"
+        value={medicalConditions}
+        onChangeText={setMedicalConditions}
         style={styles.input}
       />
 

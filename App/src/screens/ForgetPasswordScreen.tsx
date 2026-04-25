@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 
 export default function ForgotPasswordScreen() {
   const navigation = useNavigation<any>();

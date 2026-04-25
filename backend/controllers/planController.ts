@@ -1,141 +1,164 @@
-import { Request, Response } from 'express';
-import User, { IPlan } from '../models/user';
-import mongoose from 'mongoose';
+import { Request, Response } from "express";
+import User, { IPlan } from "../models/user";
+import { isValidObjectId } from "mongoose";
 
-type MealType = 'breakfast' | 'lunch' | 'dinner';
+/* =========================
+   VALIDATION HELPER
+========================= */
+const validateIds = (userId: string, profileId?: string) => {
+  if (!isValidObjectId(userId)) {
+    return "Invalid userId";
+  }
 
-// Fetch meal plan for a profile
+  if (profileId && !isValidObjectId(profileId)) {
+    return "Invalid profileId";
+  }
+
+  return null;
+};
+
+/* =========================
+   FETCH MEAL
+========================= */
 export const fetchMeal = async (req: Request, res: Response) => {
   const { userId, profileId } = req.params;
+
+  const error = validateIds(userId, profileId);
+  if (error) return res.status(400).json({ message: error });
+
   try {
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const profile = user.profile.find(p => p._id.toString() === profileId);
-    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    return res.status(200).json({
-      breakfast: profile.plan[0]?.breakfast || [],
-      lunch: profile.plan[0]?.lunch || [],
-      dinner: profile.plan[0]?.dinner || [],
+    const profile = user.profile.find((p) => p._id.toString() === profileId);
+
+    if (!profile) return res.status(404).json({ message: "Profile not found" });
+
+    return res.json({
+      breakfast: profile.plan?.[0]?.breakfast || [],
+      lunch: profile.plan?.[0]?.lunch || [],
+      dinner: profile.plan?.[0]?.dinner || [],
     });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Server error' });
+  } catch {
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
-// Add single meal item
+/* =========================
+   ADD MEAL
+========================= */
 export const addMealItem = async (req: Request, res: Response) => {
   const { userId, profileId } = req.params;
-  const { mealType, item } = req.body as { mealType: MealType; item: string };
+  const { mealType, item } = req.body;
+
+  const error = validateIds(userId, profileId);
+  if (error) return res.status(400).json({ message: error });
 
   try {
-    if (!['breakfast', 'lunch', 'dinner'].includes(mealType))
-      return res.status(400).json({ message: 'Invalid meal type' });
-
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const profile = user.profile.find(p => p._id.toString() === profileId);
-    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Initialize plan if missing
+    const profile = user.profile.find((p) => p._id.toString() === profileId);
+
+    if (!profile) return res.status(404).json({ message: "Profile not found" });
+
     if (!profile.plan || profile.plan.length === 0) {
       profile.plan = [{ breakfast: [], lunch: [], dinner: [] }];
     }
 
     const plan = profile.plan[0] as IPlan;
+
     plan[mealType] = plan[mealType] || [];
     plan[mealType].push(item);
 
     await user.save();
 
     return res.status(201).json({
-      message: `Item added to ${mealType}`,
+      message: "Item added",
       [mealType]: plan[mealType],
     });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Server error' });
+  } catch {
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
-// Delete a meal item
+/* =========================
+   DELETE MEAL
+========================= */
 export const deleteMealItem = async (req: Request, res: Response) => {
   const { userId, profileId } = req.params;
-  const { mealType, item } = req.body as { mealType: MealType; item: string }; // Get the 'item' value instead of 'index'
+  const { mealType, item } = req.body;
+
+  const error = validateIds(userId, profileId);
+  if (error) return res.status(400).json({ message: error });
 
   try {
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const profile = user.profile.find(p => p._id.toString() === profileId);
-    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    const plan = profile.plan[0];
-    if (!plan || !plan[mealType]) {
-      return res.status(400).json({ message: 'Invalid meal plan or type' });
+    const profile = user.profile.find((p) => p._id.toString() === profileId);
+
+    if (!profile) return res.status(404).json({ message: "Profile not found" });
+
+    const plan = profile.plan?.[0];
+
+    if (!plan) {
+      return res.status(400).json({ message: "No plan found" });
     }
 
-    // Find the index of the item to delete
-    const itemIndex = plan[mealType].indexOf(item);
+    const index = plan[mealType].indexOf(item);
 
-    if (itemIndex === -1) {
-      return res.status(404).json({ message: 'Meal item not found' });
+    if (index === -1) {
+      return res.status(404).json({ message: "Item not found" });
     }
 
-    plan[mealType].splice(itemIndex, 1);
+    plan[mealType].splice(index, 1);
+
     await user.save();
 
-    return res.status(200).json({
-      message: `Item removed from ${mealType}`,
+    return res.json({
+      message: "Item deleted",
       [mealType]: plan[mealType],
     });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Server error' });
+  } catch {
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
-///fetching ProfileId
-export const fetchProfile = async (req: Request, res: Response) => {
-  const { userId } = req.params;
-
-  try {
-    const user = await User.findById(userId);
-
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    if (!user.profile || user.profile.length === 0) {
-      return res.status(404).json({ message: 'No profiles found' });
-    }
-
-    // Safe access with optional chaining
-    const firstProfileId = user.profile?.[0]?._id;
-
-    if (!firstProfileId) {
-      return res.status(404).json({ message: 'No profile ID found' });
-    }
-
-    return res.status(200).json({ profileId: firstProfileId });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
-
+/* =========================
+   ADD WEIGHT LOG
+========================= */
 export const addWeightLog = async (req: Request, res: Response) => {
   const { userId, profileId } = req.params;
   const { weight } = req.body;
+
+  const error = validateIds(userId, profileId);
+  if (error) return res.status(400).json({ message: error });
+
   try {
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    const profile = user.profile.find(p => p._id.toString() === profileId);
-    if (!profile) return res.status(404).json({ message: 'Profile not found' });
-    profile.weightLog.push({ date: new Date(), weight });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const profile = user.profile.find((p) => p._id.toString() === profileId);
+
+    if (!profile) return res.status(404).json({ message: "Profile not found" });
+
+    profile.weightLog.push({
+      date: new Date(),
+      weight,
+    });
+
     await user.save();
-    return res.status(201).json({ message: 'Weight logged', weightLog: profile.weightLog });
-  } catch (err) {
-    return res.status(500).json({ error: 'Server error' });
+
+    return res.status(201).json({
+      message: "Weight logged",
+      weightLog: profile.weightLog,
+    });
+  } catch {
+    return res.status(500).json({ error: "Server error" });
   }
 };

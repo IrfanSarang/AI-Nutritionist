@@ -6,25 +6,28 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// ---------- Forgot Password (Send OTP) ----------
+// =========================
+// FORGOT PASSWORD (SEND OTP)
+// =========================
 export const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
 
   try {
     const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Generate OTP
+    // generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.resetToken = otp;
     user.resetTokenExpiry = new Date(Date.now() + 10 * 60 * 1000);
-    user.otpAttempts = 0; // reset attempts on new OTP
+    user.otpAttempts = 0;
+
     await user.save();
 
-    // Mail transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -37,19 +40,21 @@ export const forgotPassword = async (req: Request, res: Response) => {
       from: `"AI Nutritionist" <${process.env.EMAIL_USERNAME}>`,
       to: user.email,
       subject: "Your OTP for Password Reset",
-      html: `<p>Your OTP is: <b>${otp}</b>. It is valid for 10 minutes.</p>`,
+      html: `<p>Your OTP is: <b>${otp}</b>. Valid for 10 minutes.</p>`,
     });
 
-    return res.status(200).json({ message: "OTP sent to your email" });
-  } catch (error) {
-    console.error("Forgot password error:", error);
-    return res
-      .status(500)
-      .json({ message: "Something went wrong. Please try again." });
+    return res.json({ message: "OTP sent to email" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Something went wrong",
+    });
   }
 };
 
-// ---------- Verify OTP ----------
+// =========================
+// VERIFY OTP (SECURED)
+// =========================
 export const verifyOtp = async (req: Request, res: Response) => {
   const { email, otp } = req.body;
 
@@ -64,47 +69,51 @@ export const verifyOtp = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "OTP not generated" });
     }
 
-    // 🔒 OTP lockout check (NEW)
+    // ⛔ EXPIRY CHECK
+    if (user.resetTokenExpiry < new Date()) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    // 🔒 BRUTE FORCE PROTECTION
     if ((user.otpAttempts || 0) >= 5) {
       user.resetToken = null;
       user.resetTokenExpiry = null;
       user.otpAttempts = 0;
       await user.save();
 
-      return res
-        .status(429)
-        .json({ message: "Too many attempts. Request a new OTP." });
+      return res.status(429).json({
+        message: "Too many attempts. Request new OTP.",
+      });
     }
 
-    // ⏰ Expiry check
-    if (user.resetTokenExpiry < new Date()) {
-      return res.status(400).json({ message: "OTP expired" });
-    }
-
-    // ❌ Invalid OTP handling (MODIFIED)
+    // ❌ WRONG OTP
     if (user.resetToken !== otp) {
       user.otpAttempts = (user.otpAttempts || 0) + 1;
       await user.save();
 
-      return res.status(400).json({ message: "Invalid OTP" });
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
     }
 
-    // ✅ Successful OTP match (NEW RESET)
+    // ✅ SUCCESS
     user.otpAttempts = 0;
     await user.save();
 
-    return res.status(200).json({
-      message: "OTP verified. You can now reset your password.",
+    return res.json({
+      message: "OTP verified. You can reset password.",
     });
-  } catch (error) {
-    console.error("Verify OTP error:", error);
-    return res
-      .status(500)
-      .json({ message: "Something went wrong. Please try again." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Something went wrong",
+    });
   }
 };
 
-// ---------- Reset Password ----------
+// =========================
+// RESET PASSWORD (HARDENED)
+// =========================
 export const resetPassword = async (req: Request, res: Response) => {
   const { email, otp, newPassword } = req.body;
 
@@ -119,29 +128,50 @@ export const resetPassword = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "OTP not generated" });
     }
 
-    if (user.resetToken !== otp) {
-      return res.status(400).json({ message: "Invalid OTP" });
-    }
-
+    // ⛔ EXPIRY CHECK
     if (user.resetTokenExpiry < new Date()) {
       return res.status(400).json({ message: "OTP expired" });
     }
 
-    // 🔐 Secure password hashing (FIXED)
+    // 🔒 BLOCK IF TOO MANY ATTEMPTS
+    if ((user.otpAttempts || 0) >= 5) {
+      user.resetToken = null;
+      user.resetTokenExpiry = null;
+      user.otpAttempts = 0;
+      await user.save();
+
+      return res.status(429).json({
+        message: "OTP locked. Request new OTP.",
+      });
+    }
+
+    // ❌ INVALID OTP
+    if (user.resetToken !== otp) {
+      user.otpAttempts = (user.otpAttempts || 0) + 1;
+      await user.save();
+
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    // 🔐 HASH PASSWORD
     user.password = await bcrypt.hash(newPassword, 12);
 
-    // cleanup
+    // 🧹 CLEANUP
     user.resetToken = null;
     user.resetTokenExpiry = null;
     user.otpAttempts = 0;
 
     await user.save();
 
-    return res.status(200).json({ message: "Password reset successful" });
-  } catch (error) {
-    console.error("Reset password error:", error);
-    return res
-      .status(500)
-      .json({ message: "Something went wrong. Please try again." });
+    return res.json({
+      message: "Password reset successful",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Something went wrong",
+    });
   }
 };

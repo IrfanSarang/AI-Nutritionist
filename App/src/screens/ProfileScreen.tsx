@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { useActiveProfile } from '../context/ActiveProfileContext';
 import { useUser } from '../context/UserIdContext';
-import BASE_URL from '../config/url';
+import { BASE_URL } from '../../config';
 import { authFetch } from '../utils/api';
 import { clearSession } from '../utils/storage';
 
@@ -57,9 +57,7 @@ export default function ProfilesScreen() {
         return;
       }
 
-      const res = await authFetch(
-        `${BASE_URL}/api/users/${userId}/profiles`,
-      );
+      const res = await authFetch(`${BASE_URL}/api/users/${userId}/profiles`);
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -165,9 +163,7 @@ export default function ProfilesScreen() {
       <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity
           style={styles.editButton}
-          onPress={() =>
-            navigation.navigate('ProfileDetails', { id: item.id })
-          }
+          onPress={() => navigation.navigate('ProfileDetails', { id: item.id })}
         >
           <Text style={styles.editText}>View & Edit</Text>
         </TouchableOpacity>

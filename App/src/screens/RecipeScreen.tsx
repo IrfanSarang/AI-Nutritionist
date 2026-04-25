@@ -13,6 +13,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { BASE_URL } from '../../config';
 
 const RecipeScreen = () => {
   const navigation = useNavigation();
@@ -34,21 +35,18 @@ const RecipeScreen = () => {
 
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(
-        `${process.env.API_BASE_URL || 'http://10.0.2.2:5000'}/api/users/recipe`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ingredients: ingredients.trim(),
-            dietType: dietType.trim(),
-            allergies: allergies.trim(),
-          }),
+      const response = await fetch(`${BASE_URL}/api/users/recipe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({
+          ingredients: ingredients.trim(),
+          dietType: dietType.trim(),
+          allergies: allergies.trim(),
+        }),
+      });
 
       const data = await response.json();
       if (!response.ok) {
@@ -64,13 +62,20 @@ const RecipeScreen = () => {
   };
 
   return (
-    <LinearGradient colors={['#ffffff', '#88E9FF', '#ffffff']} style={styles.container}>
+    <LinearGradient
+      colors={['#ffffff', '#88E9FF', '#ffffff']}
+      style={styles.container}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}>
+        style={{ flex: 1 }}
+      >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
           <Text style={styles.title}>AI Recipe Generator</Text>
@@ -79,7 +84,8 @@ const RecipeScreen = () => {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
+          keyboardShouldPersistTaps="handled"
+        >
           {/* Ingredients Input */}
           <View style={styles.card}>
             <Text style={styles.label}>🥦 What ingredients do you have?</Text>
@@ -122,9 +128,13 @@ const RecipeScreen = () => {
 
           {/* Generate Button */}
           <TouchableOpacity
-            style={[styles.generateButton, loading && styles.generateButtonDisabled]}
+            style={[
+              styles.generateButton,
+              loading && styles.generateButtonDisabled,
+            ]}
             onPress={generateRecipes}
-            disabled={loading}>
+            disabled={loading}
+          >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
