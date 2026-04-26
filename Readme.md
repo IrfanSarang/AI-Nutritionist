@@ -1,213 +1,356 @@
-# 🥗 AI Nutritionist
+# 🥗 AI Nutritionist — Your Personal AI-Powered Dietician, In Your Pocket
 
-AI Nutritionist is a **React Native mobile application** that acts like a **virtual dietician**, helping users understand their body condition, daily food requirements, and make healthier eating choices using AI-powered insights.
+<div align="center">
 
-The app mimics a **real-life consultation with a dietician**, from checking body weight status to creating personalized diet plans and scanning food products for suitability.
+**A full-stack AI-powered mobile application built with React Native**  
+that acts as a virtual dietician — helping users understand their body,  
+calculate daily nutrition needs, scan food products, and get personalized AI-generated diet plans.
+
+[![React Native](https://img.shields.io/badge/React_Native-TypeScript-61DAFB?style=for-the-badge&logo=react)](https://reactnative.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb)](https://mongodb.com/)
+[![Claude AI](https://img.shields.io/badge/Claude_AI-Anthropic-D97757?style=for-the-badge)](https://anthropic.com/)
+[![License](https://img.shields.io/badge/License-Open_Source-blue?style=for-the-badge)](LICENSE)
+
+</div>
 
 ---
 
-## 📖 Table of Contents
+## 📌 Table of Contents
 
-- About the Project
-- Problem Statement
-- Solution
-- Features
-- App Workflow
-- Tech Stack
-- Installation & Setup
-- Usage
-- Future Enhancements
-- License
+1. [About the Project](#-about-the-project)
+2. [Problem Statement](#-problem-statement)
+3. [Solution](#-solution)
+4. [Features](#-features)
+5. [App Workflow](#-app-workflow)
+6. [Tech Stack](#-tech-stack)
+7. [Installation & Setup](#-installation--setup)
+8. [Usage Guide](#-usage-guide)
+9. [Future Enhancements](#-future-enhancements)
+10. [Developer](#-developer)
+11. [License](#-license)
 
 ---
 
 ## 📘 About the Project
 
-AI Nutritionist is designed to guide users toward better nutrition and healthier daily habits.  
-It helps users:
+**AI Nutritionist** bridges the gap between complex nutritional science and everyday users.  
+Instead of needing an expensive dietician appointment, users can open the app, enter their body details, and instantly receive AI-powered insights about their nutrition needs, meal plans, and food choices.
 
-- Check whether they are **underweight, normal, or overweight**
-- Calculate **daily food consumption needs**
-- Get **AI-generated personalized diet plans**
-- Plan meals
-- Scan food products and analyze ingredients
+This project was built as a **complete full-stack mobile application** covering:
 
-The goal is to make **nutrition guidance simple, accessible, and personalized**.
+- 📱 **React Native** frontend with clean, component-based architecture
+- ⚙️ **Node.js + Express** backend with JWT authentication
+- 🗄️ **MongoDB** database for user profiles and weight tracking
+- 🤖 **Claude AI (Anthropic)** integration for personalized recommendations
+- 📷 **Barcode scanning** for real-world food product analysis
+- ☁️ **Render deployment** (zero-cost cloud hosting)
 
 ---
 
 ## ❓ Problem Statement
 
-Many people struggle with:
+Millions of people struggle with:
 
-- Understanding their body weight condition
-- Knowing how much food they should eat daily
-- Choosing the right foods from packaged products
-- Following healthy daily habits consistently
-
-Professional dieticians are not always accessible or affordable.
+😕 **Not knowing** if they are underweight, normal, or overweight  
+😕 **No idea** how many calories, proteins, or carbs they need daily  
+😕 **Buying packaged food** without understanding the ingredients  
+😕 **Following generic diets** that don't match their body or lifestyle  
+😕 **No access** to affordable, professional nutrition guidance
 
 ---
 
 ## 💡 Solution
 
-AI Nutritionist provides a **digital dietician experience** by:
+AI Nutritionist solves all of the above by:
 
-- Using mathematical calculations to analyze body metrics
-- Generating personalized diet prompts for AI
-- Helping users plan meals
-- Giving AI-based insights on scanned food products
-- Offering practical health tips for daily improvement
+✅ Calculating **BMI, BMR, and ideal weight range** from user data  
+✅ Computing **exact daily targets** for calories, protein, carbs, fats, and water using the Mifflin-St Jeor formula  
+✅ **Scanning barcodes** and using AI to analyze product ingredient suitability  
+✅ Generating **fully personalized diet plans** via an AI chatbot  
+✅ **Tracking weight progress** over time with visual charts  
+✅ Providing **daily health tips** categorized by body type
 
 ---
 
 ## ✨ Features
 
-### 🧍 Body Weight Analysis
+### 🧍 Body Analysis & BMI Calculator
 
-- Determines whether the user is **underweight, normal, or overweight**
-- Based on user input and health calculations
+- Accepts age, gender, height, weight, and activity level
+- Calculates BMI and categorizes: **Underweight / Normal / Overweight / Obese**
+- Shows the ideal healthy weight range for the user's height
 
-### 🍽️ Daily Consumption Calculator
+### 🍽 Daily Consumption Calculator
 
-- Calculates **how much food a user should consume daily**
-- Uses mathematical formulas for accurate results
+- Uses **Mifflin-St Jeor formula** for Basal Metabolic Rate (BMR)
+- Applies activity multiplier for **Total Daily Energy Expenditure (TDEE)**
+- Breaks down daily targets: **Calories | Protein | Carbs | Fats | Water**
+- Visual macro distribution bar for quick understanding
 
-### 🤖 Ask AI (Personalized Diet)
+### 🤖 Nova — AI Chatbot (Personalized Dietician)
 
-- Generates a **simple prompt** based on user data
-- User can copy this prompt and ask the in-app AI chatbot
-- AI provides a **personalized diet plan**
+- Powered by **Claude AI (Anthropic)** via backend API
+- Remembers **conversation history** (last 50 messages)
+- Provides personalized diet plans, food swaps, and meal timings
+- Persistent chat storage using AsyncStorage
 
 ### 📅 Meal Planner
 
-- Users can choose meals from AI suggestions
-- Add selected meals to a **meal planner**
+- Browse AI-suggested meals from an Indian food dataset
+- Add meals to a daily planner
+- Track what you plan to eat throughout the day
+
+### 💧 Water Tracker
+
+- Track daily water intake (**8 glasses / 2000ml goal**)
+- Animated bottle fill bar with live % progress
+- ml consumed and ml remaining display
+- Motivational messages that update as you drink more
+- Data persists per day using AsyncStorage
 
 ### 💡 Health Tips
 
-- Daily habits and lifestyle tips
-- Helps improve overall health and consistency
+- Two modes: **General Tips** & **Personalized Tips**
+- Personalized tips tailored to: Underweight / Normal / Overweight
+- Swipeable card UI — tap "Next Tip" to browse
 
 ### 📷 Food Product Scanner
 
-- Scans **barcode of food products**
-- Displays product and ingredient information
+- Scan any packaged food barcode using the device camera
+- Fetches product name, brand, and full ingredient list
+- Displays nutritional information per serving
 
-### 🧠 AI Insight (Product Suitability)
+### 🧠 AI Product Insight
 
-- AI analyzes ingredients
-- Tells **who the product is suitable for**
-- Warns users based on ingredient composition
+- Sends scanned ingredient list to AI for analysis
+- AI responds: who the product is good for, who should avoid it
+- Highlights allergens, harmful additives, and health benefits
+
+### 🍳 AI Recipe Generator
+
+- Enter ingredients you have at home
+- Optionally specify diet type and allergies to avoid
+- AI generates **2 complete recipes** with step-by-step instructions
+
+### 📈 Weight Progress Tracker
+
+- Log daily weight entries
+- Smooth Bezier line chart (`react-native-chart-kit`)
+- Weight history stored in MongoDB via backend API
+
+### 👤 Multi-Profile Support
+
+- One account supports **multiple user profiles** (great for family use)
+- Switch active profile with one tap
+- Each profile has independent health data and weight history
+
+### 🔐 Authentication
+
+- JWT-based login / signup / forgot password
+- **OTP-based password reset** via email (Nodemailer)
+- Secure auth token stored in AsyncStorage
 
 ---
 
 ## 🔄 App Workflow
 
-1. User enters body details
-2. App checks weight category
-3. Daily food consumption is calculated
-4. A prompt is generated for AI
-5. AI provides a personalized diet
-6. User selects meals and plans them
-7. User scans food products for AI insights
-8. Health tips help improve daily habits
+```
+① User signs up / logs in          → JWT token saved
+② Creates a profile                → name, age, gender, height, weight
+③ Opens Consumption Planner        → enters body stats
+④ Gets BMI category + targets      → daily nutrition breakdown
+⑤ Chats with Nova AI               → personalized diet plan
+⑥ Adds meals to Meal Planner       → tracks planned meals
+⑦ Tracks water intake              → hits daily 2L goal
+⑧ Scans a food product             → AI analyzes ingredient suitability
+⑨ Logs weight daily                → sees progress on chart
+⑩ Reads Health Tips                → lifestyle improvements
+```
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠 Tech Stack
 
-**Frontend / Mobile App**
+### 📱 Frontend (Mobile App)
 
-- React Native
-- JavaScript
+| Technology                   | Purpose                       |
+| ---------------------------- | ----------------------------- |
+| React Native (TypeScript)    | Core mobile framework         |
+| React Navigation             | Stack + Bottom Tab navigation |
+| react-native-linear-gradient | UI gradients                  |
+| react-native-chart-kit       | Weight progress graphs        |
+| react-native-vision-camera   | Barcode scanning              |
+| AsyncStorage                 | Local data persistence        |
+| Animated API                 | Water tracker animations      |
 
-**AI & Logic**
+### ⚙️ Backend (REST API)
 
-- AI Chatbot Integration
-- Mathematical health calculations
+| Technology                        | Purpose                      |
+| --------------------------------- | ---------------------------- |
+| Node.js + Express.js (TypeScript) | Server framework             |
+| MongoDB + Mongoose                | Database & ODM               |
+| JWT (JSON Web Tokens)             | Authentication               |
+| Nodemailer                        | OTP email for password reset |
+| express-rate-limiter              | API protection               |
+| Render                            | Cloud deployment (free tier) |
 
-**Tools**
+### 🤖 AI Integration
 
-- Git & GitHub
-- VS Code
+| Technology            | Purpose                                  |
+| --------------------- | ---------------------------------------- |
+| Claude AI (Anthropic) | Nova chatbot + product insight           |
+| Prompt Engineering    | Diet plans, recipes, ingredient analysis |
+
+### 🧰 Tools & DevOps
+
+| Tool                        | Purpose                  |
+| --------------------------- | ------------------------ |
+| Git + GitHub                | Version control          |
+| VS Code + ESLint + Prettier | Development environment  |
+| Android Studio              | Emulator & build testing |
 
 ---
 
-## ⚙️ Installation & Setup
+## 📦 Installation & Setup
 
-You can use the AI Nutritionist app in **two ways**:
+### 🔹 Option 1: Test the App via APK _(Recommended for Evaluators)_
 
----
+**Step 1 — Download the APK**
 
-### 🔹 Option 1: Test the App (Release Version)
+- Go to the [Releases](https://github.com/IrfanSarang/AI-Nutritionist/releases) section of this repository
+- Download the latest release APK
 
-This option is for users who want to **test the app without setting up the project locally**.
-
-#### 1️⃣ Download the App Release
-
-- Go to the **Releases** section of this GitHub repository
-- Download the latest **APK (Android release build)**
-
-#### 2️⃣ Install the App
+**Step 2 — Install on Android**
 
 - Transfer the APK to your Android device
-- Enable **Install from Unknown Sources** in device settings
-- Install the APK
+- Enable **"Install from Unknown Sources"** in device settings
+- Tap the APK to install
 
-#### 3️⃣ Run the Provided Server (Web)
+**Step 3 — Launch the app**
 
-- The backend / AI server is hosted on **Render**
-- Open the provided **server URL** in your web browser
-- Ensure the server status is **running** before opening the app
+- Open AI Nutritionist on your device
+- Sign up with an email and start exploring
 
-```bash
-https://ai-nutritionist-5axb.onrender.com
-```
-
-> 🌐 No local server setup is required
-
-#### 4️⃣ Open the App
-
-- Launch the app on your device
-- The app will connect to the online server automatically
-
-> ✅ Best for testers, evaluators, and demo purposes
+✅ No coding needed — best for testers, evaluators, and recruiters
 
 ---
 
-### 🔹 Option 2: Run the App Locally (Development Mode)
+### 🔹 Option 2: Run Locally _(Development Mode)_
 
-This option is for developers who want to **run and modify the app locally**.
+**Prerequisites**
 
-#### 1️⃣ Clone the repository
+- Node.js v18+
+- Android Studio with an emulator or a physical Android device
+- React Native environment configured:  
+  👉 [https://reactnative.dev/docs/set-up-your-environment](https://reactnative.dev/docs/set-up-your-environment)
+
+**Step 1 — Clone the repository**
 
 ```bash
-https://github.com/IrfanSarang/AI-Nutritionist.git
+git clone https://github.com/IrfanSarang/AI-Nutritionist.git
+cd AI-Nutritionist
 ```
 
-#### 2️⃣ Install dependencies
+**Step 2 — Install frontend dependencies**
 
 ```bash
 cd App
 npm install
+```
 
-cd..
-cd backend
+**Step 3 — Install backend dependencies**
+
+```bash
+cd ../backend
 npm install
 ```
 
-#### 3️⃣ Set Environment Variables in backend
+**Step 4 — Configure environment variables**
 
-The make a .env file and in backend cpoy the format from .en.template and make set variables value
+Create a `.env` file in the `/backend` directory. Copy the format from `.env.template` and fill in your values:
 
-#### 4️⃣ Run the frontend and backend
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+EMAIL_USER=your_gmail_address
+EMAIL_PASS=your_gmail_app_password
+```
+
+**Step 5 — Run the backend**
 
 ```bash
-cd App
-npm run Android
-
-cd ..
 cd backend
 npm run dev
 ```
+
+✓ Server will start on `http://localhost:3000`
+
+**Step 6 — Update the frontend API URL**
+
+Open `App/config.ts` and set:
+
+```ts
+export const BASE_URL = "http://10.0.2.2:3000"; // Android emulator
+// OR
+export const BASE_URL = "http://YOUR_LOCAL_IP:3000"; // Physical device
+```
+
+**Step 7 — Run the app**
+
+```bash
+cd App
+npm run android
+```
+
+---
+
+## 🚀 Usage Guide
+
+| Step | Action                                                                 |
+| ---- | ---------------------------------------------------------------------- |
+| 1    | **Sign Up** → Create an account with your email                        |
+| 2    | **Add Profile** → Enter your name and health details                   |
+| 3    | **Consumption Planner** → Input body stats for daily targets           |
+| 4    | **Chat with Nova** → Ask for diet plans, meal suggestions, food advice |
+| 5    | **Scan Products** → Use barcode scanner for AI ingredient analysis     |
+| 6    | **Log Water** → Tap glasses throughout the day to hit your 2L goal     |
+| 7    | **Track Weight** → Log your weight daily to see your progress chart    |
+| 8    | **Health Tips** → Browse tips matched to your body type category       |
+
+---
+
+## 🔮 Future Enhancements
+
+- 🔔 **Push notifications** for water reminders and meal times
+- 🍱 **Calorie tracking** — log food and auto-deduct from daily target
+- 🌙 **Dark mode** support across all screens
+- 🌍 **Multi-language support** (Hindi, Marathi, Tamil, etc.)
+- 📊 **Weekly / Monthly** nutrition summary reports
+- 🧬 **Wearable integration** (Fitbit, Apple Health, Google Fit)
+- 🛒 **Smart grocery list** generator based on meal plan
+- 🤝 **Dietician marketplace** — connect with real nutrition professionals
+
+---
+
+## 👨‍💻 Developer
+
+**Built by Irfan Sarang**
+
+- 🐙 GitHub: [github.com/IrfanSarang](https://github.com/IrfanSarang)
+- 📁 Project: [github.com/IrfanSarang/AI-Nutritionist](https://github.com/IrfanSarang/AI-Nutritionist)
+
+---
+
+## 📄 License
+
+This project is open source and available for educational and personal use.  
+See [LICENSE](LICENSE) for full details.
+
+---
+
+<div align="center">
+
+Made with ❤️ by Irfan Sarang
+
+</div>

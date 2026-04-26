@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image } from 'react-native';
+import { Image, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import AIScreen from '../screens/AIScreen';
@@ -13,107 +13,105 @@ const BottomTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarStyle: { height: 75 },
-        tabBarActiveTintColor: '#1e90ff',
-        tabBarInactiveTintColor: '#aaaaaa',
+        headerShown: false,
+        tabBarStyle: { height: 70 },
       }}
     >
-      {/* Home Tab */}
       <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
-          headerShown: false,
-          tabBarLabel: 'Home',
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '600',
-            paddingTop: 2,
-          },
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
           tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../assets/icons/homeIcon.png')}
+            <View
               style={{
-                width: 26,
-                height: 26,
-                tintColor: focused ? '#1e90ff' : '#aaaaaa',
+                padding: 8,
+                borderRadius: 10,
               }}
-            />
+            >
+              <Image
+                source={require('../assets/icons/homeIcon.png')}
+                style={{
+                  width: 24,
+                  height: 24,
+                  tintColor: '#1e90ff',
+                }}
+              />
+            </View>
           ),
         }}
       />
 
-      {/* Scan Tab */}
       <Tab.Screen
         name="Scan"
         component={ScanScreen}
         options={{
-          headerShown: false,
-          tabBarLabel: 'Scan',
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '600',
-            paddingTop: 2,
-          },
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
           tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../assets/icons/scanIcon.png')}
+            <View
               style={{
-                width: 26,
-                height: 26,
-                tintColor: focused ? '#1e90ff' : '#aaaaaa',
+                padding: 8,
+                borderRadius: 10,
               }}
-            />
+            >
+              <Image
+                source={require('../assets/icons/scanIcon.png')}
+                style={{
+                  width: 24,
+                  height: 24,
+                  tintColor: '#1e90ff',
+                }}
+              />
+            </View>
           ),
         }}
       />
 
-      {/* AI Tab */}
       <Tab.Screen
         name="AI"
         component={AIScreen}
         options={{
-          headerShown: false,
-          tabBarLabel: 'AI',
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '600',
-            paddingTop: 2,
-          },
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
           tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../assets/icons/robotLogo.png')}
+            <View
               style={{
-                width: 40,
-                height: 40,
-                tintColor: focused ? '#1e90ff' : '#aaaaaa',
+                padding: 8,
+                borderRadius: 12,
               }}
-            />
+            >
+              <Image
+                source={require('../assets/icons/robotLogo.png')}
+                style={{
+                  width: 36,
+                  height: 36,
+                }}
+              />
+            </View>
           ),
         }}
       />
 
-      {/* Profile Tab */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          headerShown: false,
-          tabBarLabel: 'Profile',
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '600',
-            paddingTop: 2,
-          },
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
           tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../assets/icons/profileIcon.png')}
+            <View
               style={{
-                width: 26,
-                height: 26,
-                tintColor: focused ? '#1e90ff' : '#aaaaaa',
+                padding: 6,
+                borderRadius: 10,
               }}
-            />
+            >
+              <Image
+                source={require('../assets/icons/profileIcon.png')}
+                style={{
+                  width: 24,
+                  height: 24,
+                  tintColor: '#1e90ff',
+                }}
+              />
+            </View>
           ),
         }}
       />
